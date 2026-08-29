@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="1-create-material-table" author="UmKa">
+        <createTable tableName="materials">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="unit" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2-create-purchase-record-table" author="UmKa">
+        <createTable tableName="purchase_records">
+            <column name="id" type="BIGSERIAL">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="order_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="DOUBLE PRECISION">
+                <constraints nullable="false"/>
+            </column>
+            <column name="material_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_purchase_record_material"
+                             referencedTableName="materials"
+                             referencedColumnNames="id"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="purchase_records" indexName="idx_purchase_record_material">
+            <column name="material_id"/>
+        </createIndex>
+        <createIndex tableName="purchase_records" indexName="idx_purchase_record_order">
+            <column name="order_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="3-add-unique-order-material" author="UmKa">
+        <addUniqueConstraint tableName="purchase_records"
+                             columnNames="order_id, material_id"
+                             constraintName="uk_order_material"/>
+    </changeSet>
+
+    <changeSet id="4-insert-initial-materials" author="UmKa">
+        <insert tableName="materials">
+            <column name="name" value="Сталь листова"/>
+            <column name="unit" value="KG"/>
+            <column name="description" value="Конструкційна сталь"/>
+        </insert>
+        <insert tableName="materials">
+            <column name="name" value="Кабель мідний"/>
+            <column name="unit" value="METERS"/>
+            <column name="description" value="Силовий кабель 3x2.5"/>
+        </insert>
+        <insert tableName="materials">
+            <column name="name" value="Розчинник"/>
+            <column name="unit" value="LITERS"/>
+            <column name="description" value="Технічний розчинник"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

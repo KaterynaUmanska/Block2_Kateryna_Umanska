@@ -1,0 +1,11 @@
+services:
+  postgres:
+    image: postgres:18.6
+    container_name: purchase_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=purchase_db
+    restart: unless-stopped
