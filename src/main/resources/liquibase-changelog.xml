@@ -7,7 +7,7 @@
 
     <changeSet id="1-create-material-table" author="UmKa">
         <createTable tableName="materials">
-            <column name="id" type="BIGSERIAL">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(255)">
@@ -22,7 +22,7 @@
 
     <changeSet id="2-create-purchase-record-table" author="UmKa">
         <createTable tableName="purchase_records">
-            <column name="id" type="BIGSERIAL">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="order_id" type="BIGINT">
