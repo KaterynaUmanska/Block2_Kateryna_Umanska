@@ -1,5 +1,6 @@
 package org.example.block2.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceException;
@@ -7,16 +8,30 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.block2.data.MaterialData;
 import org.example.block2.data.PurchaseRecordData;
-import org.example.block2.dto.MaterialDto;
-import org.example.block2.dto.PurchaseRecordDto;
-import org.example.block2.dto.PurchaseRecordSaveDto;
+import org.example.block2.dto.*;
 import org.example.block2.repository.MaterialRepository;
 import org.example.block2.repository.PurchaseRecordRepository;
+import org.example.block2.utils.JsonStreamParser;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.validation.Validator;
+import org.example.block2.dto.PurchaseRecordProcessingResult;
+import org.example.block2.dto.PurchaseRecordSaveDto;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicInteger;
+
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Service for purchase record processing operations.
@@ -28,6 +43,9 @@ public class PurchaseRecordService {
 
     private final PurchaseRecordRepository purchaseRecordRepository;
     private final MaterialRepository materialRepository;
+    private final CsvReportService csvReportService;
+    private final ObjectMapper objectMapper;
+    private final Validator validator;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -161,6 +179,64 @@ public class PurchaseRecordService {
 
         log.info("Successfully deleted purchase record with ID: {}", id);
     }
+    /**
+     * Returns filtered purchase records with pagination.
+     *
+     * @param filter filtering and pagination parameters
+     * @return paginated list of purchase records
+     */
+    @Transactional(readOnly = true)
+    public PurchaseRecordListResponse getPurchaseRecords(
+            PurchaseRecordFilterDto filter) {
+
+        log.debug(
+                "Fetching purchase records with filters: orderId={}, materialName={}, " +
+                        "quantityFrom={}, quantityTo={}, page={}, size={}",
+                filter.getOrderId(),
+                filter.getMaterialName(),
+                filter.getQuantityFrom(),
+                filter.getQuantityTo(),
+                filter.getPage(),
+                filter.getSize()
+        );
+
+        String materialName = filter.getMaterialName();
+
+        if (materialName != null && materialName.isBlank()) {
+            materialName = null;
+        }
+
+        Pageable pageable = PageRequest.of(
+                filter.getPage(),
+                filter.getSize()
+        );
+
+        Page<PurchaseRecordData> result =
+                purchaseRecordRepository.findByFilters(
+                        filter.getOrderId(),
+                        materialName,
+                        filter.getQuantityFrom(),
+                        filter.getQuantityTo(),
+                        pageable
+                );
+
+        List<PurchaseRecordListDto> records = result.getContent()
+                .stream()
+                .map(PurchaseRecordService::convertToListDto)
+                .toList();
+
+        log.info(
+                "Found {} purchase records on page {} of {}",
+                records.size(),
+                filter.getPage(),
+                result.getTotalPages()
+        );
+
+        return new PurchaseRecordListResponse(
+                records,
+                result.getTotalPages()
+        );
+    }
 
     /**
      * Finds material by ID or throws exception.
@@ -225,4 +301,83 @@ public class PurchaseRecordService {
         result.setQuantity(dto.getQuantity());
         return result;
     }
+    /**
+     * Converts entity to reduced list DTO.
+     *
+     * @param data purchase record entity
+     * @return reduced purchase record DTO
+     */
+    private static PurchaseRecordListDto convertToListDto(PurchaseRecordData data) {
+
+        return new PurchaseRecordListDto(data.getId(), data.getOrderId(), data.getMaterial().getName(), data.getQuantity());
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] generateReport(PurchaseRecordFilterDto filter) {
+
+        log.info(
+                "Generating purchase records report with filters: orderId={}, materialName={}, quantityFrom={}, quantityTo={}",
+                filter.getOrderId(),
+                filter.getMaterialName(),
+                filter.getQuantityFrom(),
+                filter.getQuantityTo()
+        );
+
+        String materialName = filter.getMaterialName();
+
+        if (materialName != null && materialName.isBlank()) {
+            materialName = null;
+        }
+
+        List<PurchaseRecordData> records = purchaseRecordRepository.findAllByFilters(filter.getOrderId(), materialName, filter.getQuantityFrom(), filter.getQuantityTo());
+
+        byte[] report = csvReportService.generatePurchaseRecordsReport(records);
+
+        log.info("Generated purchase records report with {} records", records.size());
+        return report;
+    }
+
+    private boolean importPurchaseRecord(PurchaseRecordSaveDto dto) {
+
+        if (!validator.validate(dto).isEmpty()) {
+            log.warn("Invalid purchase record skipped");
+            return false;
+        }
+
+        try {
+            savePurchaseRecord(dto);
+            return true;
+        } catch (IllegalArgumentException e) {
+            log.warn(
+                    "Purchase record was not imported: {}",
+                    e.getMessage()
+            );
+            return false;
+        }
+    }
+    @Transactional
+    public PurchaseRecordProcessingResult importPurchaseRecords(
+            InputStream inputStream
+    ) throws IOException {
+
+        AtomicInteger successful = new AtomicInteger();
+        AtomicInteger failed = new AtomicInteger();
+
+        JsonStreamParser parser = new JsonStreamParser(objectMapper);
+
+        parser.parse(inputStream, dto -> {
+            if (importPurchaseRecord(dto)) {
+                successful.incrementAndGet();
+            } else {
+                failed.incrementAndGet();
+            }
+        });
+
+        return PurchaseRecordProcessingResult.builder()
+                .successful(successful.get())
+                .failed(failed.get())
+                .build();
+    }
+
+
 }
