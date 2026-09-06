@@ -33,8 +33,7 @@ public class PurchaseRecordController {
      * @param id purchase record ID
      * @return purchase record details with material
      */
-    @Operation(summary = "Get purchase record details", description = "Retrieves purchase record details including associated material"
-    )
+    @Operation(summary = "Get purchase record details", description = "Retrieves purchase record details including associated material")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Purchase record found",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = PurchaseRecordDto.class))),

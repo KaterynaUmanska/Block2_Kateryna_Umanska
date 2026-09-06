@@ -1,5 +1,10 @@
 package org.example.block2.service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceException;
+import org.example.block2.dto.MaterialDto;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,39 +22,176 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class MaterialService {
+
     private final MaterialRepository materialRepository;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    /**
+     * Creates a new material.
+     *
+     * @param dto material save DTO
+     * @return created material DTO
+     * @throws IllegalArgumentException if duplicate name or invalid data
+     */
     @Transactional
-    public MaterialData saveMaterial(MaterialSaveDto dto) {
+    public MaterialDto saveMaterial(MaterialSaveDto dto) {
         log.info("Attempting to save new material with name: '{}'", dto.getName());
 
-        MaterialData material = new MaterialData();
-        material.setName(dto.getName());
-        material.setDescription(dto.getDescription());
-        material.setUnit(dto.getUnit());
+        MaterialData material = convertToData(dto);
 
-        MaterialData savedMaterial = materialRepository.save(material);
-        log.info("Successfully saved material with ID: {}", savedMaterial.getId());
+        try {
+            MaterialData saved = materialRepository.save(material);
+            entityManager.flush(); // Примусово виконуємо запит у БД, щоб зловити унікальне обмеження на ім'я
 
-        return savedMaterial;
+            log.info("Successfully saved material with ID: {}", saved.getId());
+            return convertToDto(saved);
+
+        } catch (PersistenceException | DataIntegrityViolationException ex) {
+            String message = ex.getMessage();
+            if (message != null && (message.toLowerCase().contains("material") || message.toLowerCase().contains("name"))) {
+                throw new IllegalArgumentException(
+                        "Material with name '%s' already exists".formatted(dto.getName()), ex
+                );
+            }
+            throw ex;
+        }
     }
 
+    /**
+     * Returns all materials as DTOs.
+     *
+     * @return list of material DTOs
+     */
     @Transactional(readOnly = true)
-    public List<MaterialData> getAllMaterials() {
-        log.debug("Fetching all materials from the database");
-        List<MaterialData> materials = materialRepository.findAll();
+    public List<MaterialDto> getAllMaterials() {
+        log.debug("Fetching all materials from database");
+
+        List<MaterialDto> materials = materialRepository.findAll().stream()
+                .map(MaterialService::convertToDto)
+                .toList();
+
         log.info("Found {} materials in total", materials.size());
 
         return materials;
     }
 
+    /**
+     * Returns material DTO by ID.
+     *
+     * @param id material ID
+     * @return material DTO
+     */
     @Transactional(readOnly = true)
-    public MaterialData getMaterialById(Long id) {
+    public MaterialDto getMaterialById(Long id) {
         log.debug("Fetching material by ID: {}", id);
-        return materialRepository.findById(id)
+
+        MaterialData data = materialRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Material with ID {} not found", id);
-                    return new IllegalArgumentException("Material not found with id: " + id);
+                    return new IllegalArgumentException(
+                            "Material not found with id: " + id
+                    );
                 });
+
+        return convertToDto(data);
+    }
+
+    /**
+     * Updates an existing material.
+     *
+     * @param id  material ID
+     * @param dto new material data
+     */
+    @Transactional
+    public void updateMaterial(Long id, MaterialSaveDto dto) {
+        log.info("Attempting to update material with ID: {}", id);
+
+        MaterialData material = materialRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Material with ID {} not found", id);
+                    return new IllegalArgumentException(
+                            "Material not found with id: " + id
+                    );
+                });
+
+        if (dto.getName() != null) {
+            material.setName(dto.getName());
+        }
+        if (dto.getUnit() != null) {
+            material.setUnit(dto.getUnit());
+        }
+        material.setDescription(dto.getDescription());
+
+        try {
+            materialRepository.save(material);
+            entityManager.flush();
+
+            log.info("Successfully updated material with ID: {}", id);
+        } catch (PersistenceException | DataIntegrityViolationException ex) {
+            String message = ex.getMessage();
+            if (message != null && (message.toLowerCase().contains("material") || message.toLowerCase().contains("name"))) {
+                throw new IllegalArgumentException(
+                        "Material with name '%s' already exists".formatted(dto.getName()), ex
+                );
+            }
+            throw ex;
+        }
+    }
+
+    /**
+     * Deletes material by ID.
+     *
+     * @param id material ID
+     */
+    @Transactional
+    public void deleteMaterial(Long id) {
+        log.info("Attempting to delete material with ID: {}", id);
+
+        MaterialData material = materialRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Material with ID {} not found", id);
+                    return new IllegalArgumentException(
+                            "Material not found with id: " + id
+                    );
+                });
+
+        materialRepository.delete(material);
+
+        log.info("Successfully deleted material with ID: {}", id);
+    }
+
+    /**
+     * Converts entity to DTO.
+     *
+     * @param data material entity
+     * @return material DTO
+     */
+    private static MaterialDto convertToDto(MaterialData data) {
+        if (data == null) {
+            return null;
+        }
+
+        return MaterialDto.builder()
+                .id(data.getId())
+                .name(data.getName())
+                .unit(data.getUnit())
+                .description(data.getDescription())
+                .build();
+    }
+
+    /**
+     * Converts save DTO to entity.
+     *
+     * @param dto save DTO
+     * @return material entity
+     */
+    private static MaterialData convertToData(MaterialSaveDto dto) {
+        MaterialData result = new MaterialData();
+        result.setName(dto.getName());
+        result.setUnit(dto.getUnit());
+        result.setDescription(dto.getDescription());
+        return result;
     }
 }
