@@ -35,7 +35,8 @@
                 <constraints nullable="false"
                              foreignKeyName="fk_purchase_record_material"
                              referencedTableName="materials"
-                             referencedColumnNames="id"/>
+                             referencedColumnNames="id"
+                             deleteCascade="false"/>
             </column>
         </createTable>
 

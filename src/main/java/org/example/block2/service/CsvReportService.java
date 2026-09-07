@@ -46,6 +46,12 @@ public class CsvReportService {
         return result;
     }
 
+    /**
+     * Escapes CSV values containing special characters.
+     *
+     * @param value value to escape
+     * @return escaped value
+     */
     private String escape(String value) {
 
         if (value == null) {

@@ -4,6 +4,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceException;
 import org.example.block2.dto.MaterialDto;
+import org.example.block2.exeption.DuplicateResourceException;
+import org.example.block2.exeption.ResourceNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -90,7 +92,7 @@ public class MaterialService {
         MaterialData data = materialRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Material with ID {} not found", id);
-                    return new IllegalArgumentException(
+                    return new ResourceNotFoundException(
                             "Material not found with id: " + id
                     );
                 });
@@ -132,8 +134,8 @@ public class MaterialService {
         } catch (PersistenceException | DataIntegrityViolationException ex) {
             String message = ex.getMessage();
             if (message != null && (message.toLowerCase().contains("material") || message.toLowerCase().contains("name"))) {
-                throw new IllegalArgumentException(
-                        "Material with name '%s' already exists".formatted(dto.getName()), ex
+                throw new DuplicateResourceException(
+                        "Material with name '%s' already exists".formatted(dto.getName())
                 );
             }
             throw ex;

@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.block2.data.MaterialData;
 import org.example.block2.data.PurchaseRecordData;
 import org.example.block2.dto.*;
+import org.example.block2.exeption.DuplicateResourceException;
+import org.example.block2.exeption.ResourceNotFoundException;
 import org.example.block2.repository.MaterialRepository;
 import org.example.block2.repository.PurchaseRecordRepository;
 import org.example.block2.utils.JsonStreamParser;
@@ -78,9 +80,9 @@ public class PurchaseRecordService {
         } catch (PersistenceException | DataIntegrityViolationException ex) {
             String message = ex.getMessage();
             if (message != null && message.toLowerCase().contains("uk_order_material")) {
-                throw new IllegalArgumentException(
+                throw new DuplicateResourceException(
                         "Purchase record for order ID '%d' and material ID '%d' already exists"
-                                .formatted(dto.getOrderId(), dto.getMaterialId()), ex
+                                .formatted(dto.getOrderId(), dto.getMaterialId())
                 );
             }
             throw ex;
@@ -252,7 +254,7 @@ public class PurchaseRecordService {
                             materialId
                     );
 
-                    return new IllegalArgumentException(
+                    return new ResourceNotFoundException(
                             "Material not found with id: " + materialId
                     );
                 });
