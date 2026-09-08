@@ -55,7 +55,7 @@ public class MaterialController {
             @ApiResponse(responseCode = "200", description = "Material found",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = MaterialDto.class))),
             @ApiResponse(responseCode = "404", description = "Material not found",
-                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class)))
     })
     @GetMapping("/{id}")
     public MaterialDto getMaterial(
@@ -73,13 +73,15 @@ public class MaterialController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Material created successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = MaterialDto.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid material data or name already exists",
-                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+            @ApiResponse(responseCode = "400", description = "Invalid material data",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "Material name already exists",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public MaterialDto createMaterial(
-            @Parameter(description = "Material data", required = true) @Valid @RequestBody MaterialSaveDto dto) {
+            @Valid @RequestBody MaterialSaveDto dto) {
         return materialService.saveMaterial(dto);
     }
 
@@ -92,16 +94,18 @@ public class MaterialController {
     @Operation(summary = "Update material", description = "Updates an existing material with new data considering name uniqueness")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Material updated successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid material data or name already exists",
-                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid material data",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "404", description = "Material not found",
-                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "Material name already exists",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateMaterial(
             @Parameter(description = "Material ID", required = true) @PathVariable("id") Long id,
-            @Parameter(description = "Updated material data", required = true) @Valid @RequestBody MaterialSaveDto dto) {
+            @Valid @RequestBody MaterialSaveDto dto) {
         materialService.updateMaterial(id, dto);
     }
 
@@ -114,7 +118,9 @@ public class MaterialController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Material deleted successfully"),
             @ApiResponse(responseCode = "404", description = "Material not found",
-                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "Material cannot be deleted because it is referenced by purchase records",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class)))
     })
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

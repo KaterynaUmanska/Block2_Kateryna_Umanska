@@ -1,6 +1,7 @@
-package org.example.block2.exeption;
+package org.example.block2.exception;
 
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -94,6 +95,26 @@ public class GlobalExceptionHandler {
 
         problemDetail.setTitle("Validation failed");
         problemDetail.setDetail(ex.getMessage());
+
+        return problemDetail;
+    }
+    /**
+     * Handles database constraint and data integrity violations (e.g., foreign key conflicts).
+     *
+     * @param ex data integrity violation exception
+     * @return problem details
+     */
+    @ExceptionHandler({
+            DataIntegrityViolationException.class,
+            org.hibernate.exception.ConstraintViolationException.class
+    })
+    public ProblemDetail handleDataIntegrityViolation(Exception ex) {
+
+        ProblemDetail problemDetail =
+                ProblemDetail.forStatus(HttpStatus.CONFLICT);
+
+        problemDetail.setTitle("Conflict violation");
+        problemDetail.setDetail("Resource cannot be modified or deleted because it is referenced by other records.");
 
         return problemDetail;
     }

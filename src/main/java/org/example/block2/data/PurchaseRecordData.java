@@ -5,6 +5,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 /**
  * Purchase record persistent entity.
  */
@@ -38,7 +40,7 @@ public class PurchaseRecordData {
     /**
      * Required material quantity.
      */
-    @Column(nullable = false)
-    private Double quantity;
+    @Column(nullable = false, precision = 19, scale = 3)
+    private BigDecimal quantity;
 
 }

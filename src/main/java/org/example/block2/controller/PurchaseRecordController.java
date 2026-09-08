@@ -43,6 +43,7 @@ public class PurchaseRecordController {
     public List<PurchaseRecordDto> getAllPurchaseRecords() {
         return purchaseRecordService.getAllPurchaseRecords();
     }
+
     /**
      * Retrieves purchase record details by ID.
      *
@@ -54,7 +55,7 @@ public class PurchaseRecordController {
             @ApiResponse(responseCode = "200", description = "Purchase record found",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = PurchaseRecordDto.class))),
             @ApiResponse(responseCode = "404", description = "Purchase record not found",
-                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class)))
     })
     @GetMapping("/{id}")
     public PurchaseRecordDto getPurchaseRecord(
@@ -73,36 +74,40 @@ public class PurchaseRecordController {
             @ApiResponse(responseCode = "201", description = "Purchase record created successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = PurchaseRecordDto.class))),
             @ApiResponse(responseCode = "400", description = "Invalid purchase record data",
-                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "404", description = "Material not found",
-                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "Purchase record already exists",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public PurchaseRecordDto createPurchaseRecord(
-            @Parameter(description = "Purchase record data", required = true) @Valid @RequestBody PurchaseRecordSaveDto dto) {
+            @Valid @RequestBody PurchaseRecordSaveDto dto) {
         return purchaseRecordService.savePurchaseRecord(dto);
     }
 
     /**
      * Updates an existing purchase record.
      *
-     * @param id purchase record ID
+     * @param id  purchase record ID
      * @param dto updated purchase record data
      */
     @Operation(summary = "Update purchase record", description = "Updates an existing purchase record with new data")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Purchase record updated successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid purchase record data",
-                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "404", description = "Purchase record or material not found",
-                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "Purchase record already exists",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updatePurchaseRecord(
             @Parameter(description = "Purchase record ID", required = true) @PathVariable("id") Long id,
-            @Parameter(description = "Updated purchase record data", required = true) @Valid @RequestBody PurchaseRecordSaveDto dto) {
+            @Valid @RequestBody PurchaseRecordSaveDto dto) {
         purchaseRecordService.updatePurchaseRecord(id, dto);
     }
 
@@ -115,7 +120,7 @@ public class PurchaseRecordController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Purchase record deleted successfully"),
             @ApiResponse(responseCode = "404", description = "Purchase record not found",
-                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class)))
     })
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -138,12 +143,11 @@ public class PurchaseRecordController {
             @ApiResponse(responseCode = "200", description = "Purchase records found",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = PurchaseRecordListResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invalid filter parameters",
-                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PostMapping("/_list")
     public PurchaseRecordListResponse getPurchaseRecords(
-            @Parameter(description = "Filtering and pagination parameters", required = true) @Valid @RequestBody PurchaseRecordFilterDto filter) {
-
+            @Valid @RequestBody PurchaseRecordFilterDto filter) {
         return purchaseRecordService.getPurchaseRecords(filter);
     }
 
@@ -157,11 +161,11 @@ public class PurchaseRecordController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Report generated successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid filter parameters",
-                    content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PostMapping("/_report")
     public ResponseEntity<byte[]> generateReport(
-            @Parameter(description = "Filtering parameters", required = true) @Valid @RequestBody PurchaseRecordFilterDto filter) {
+            @Valid @RequestBody PurchaseRecordReportFilterDto filter) {
 
         byte[] report = purchaseRecordService.generateReport(filter);
 
@@ -175,12 +179,26 @@ public class PurchaseRecordController {
                 .body(report);
     }
 
+    /**
+     * Uploads and parses purchase records from JSON file.
+     *
+     * @param file multipart JSON file
+     * @return processing result statistics
+     */
+    @Operation(summary = "Upload purchase records from file", description = "Parses and imports purchase records from an uploaded JSON file")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "File processed successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = PurchaseRecordProcessingResult.class))),
+            @ApiResponse(responseCode = "400", description = "Uploaded file is empty or invalid",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class)))
+    })
     @PostMapping(
             value = "/upload",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
     )
     @ResponseStatus(HttpStatus.OK)
     public PurchaseRecordProcessingResult uploadPurchaseRecords(
+            @Parameter(description = "JSON file with purchase records", required = true)
             @RequestParam("file") MultipartFile file
     ) throws IOException {
 

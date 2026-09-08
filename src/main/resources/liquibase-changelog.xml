@@ -28,7 +28,8 @@
             <column name="order_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
-            <column name="quantity" type="DOUBLE PRECISION">
+            <!-- Змінили DOUBLE PRECISION на DECIMAL(19,3) для підтримки BigDecimal -->
+            <column name="quantity" type="DECIMAL(19,3)">
                 <constraints nullable="false"/>
             </column>
             <column name="material_id" type="BIGINT">

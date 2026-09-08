@@ -3,6 +3,8 @@ package org.example.block2.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.math.BigDecimal;
+
 
 /**
  * DTO for the list response .
@@ -12,7 +14,7 @@ import lombok.Getter;
 public class PurchaseRecordListDto {
 
     /**
-     * Purchase order ID.
+     * Purchase record ID.
      */
     private Long id;
 
@@ -29,5 +31,5 @@ public class PurchaseRecordListDto {
     /**
      * Required quantity.
      */
-    private Double quantity;
+    private BigDecimal quantity;
 }

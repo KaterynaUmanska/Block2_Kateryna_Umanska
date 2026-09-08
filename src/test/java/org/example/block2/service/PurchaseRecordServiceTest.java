@@ -5,12 +5,18 @@ import jakarta.transaction.Transactional;
 import org.example.block2.data.PurchaseRecordData;
 import org.example.block2.dict.Unit;
 import org.example.block2.dto.*;
-import org.example.block2.exeption.DuplicateResourceException;
-import org.example.block2.exeption.ResourceNotFoundException;
+import org.example.block2.exception.DuplicateResourceException;
+import org.example.block2.exception.ResourceNotFoundException;
+import org.example.block2.repository.MaterialRepository;
+import org.example.block2.repository.PurchaseRecordRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.math.BigDecimal;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -25,13 +31,25 @@ public class PurchaseRecordServiceTest {
     @Autowired
     EntityManager entityManager;
 
+    @Autowired
+    private PurchaseRecordRepository purchaseRecordRepository;
+
+    @Autowired
+    private MaterialRepository materialRepository;
+
+    @AfterEach
+    void tearDown() {
+        purchaseRecordRepository.deleteAll();
+        materialRepository.deleteAll();
+    }
+
     @Test
     @Transactional
     void createPurchaseRecord() {
 
         MaterialDto material = materialService.saveMaterial(
                 MaterialSaveDto.builder()
-                        .name("Test steel")
+                        .name("Test name")
                         .description("Test material")
                         .unit(Unit.KG)
                         .build()
@@ -41,7 +59,7 @@ public class PurchaseRecordServiceTest {
                 PurchaseRecordSaveDto.builder()
                         .orderId(100L)
                         .materialId(material.getId())
-                        .quantity(50.0)
+                        .quantity(BigDecimal.valueOf(50.0))
                         .build()
         );
 
@@ -51,7 +69,7 @@ public class PurchaseRecordServiceTest {
         assertThat(result.getQuantity()).isEqualTo(50.0);
         assertThat(result.getMaterial()).isNotNull();
         assertThat(result.getMaterial().getId()).isEqualTo(material.getId());
-        assertThat(result.getMaterial().getName()).isEqualTo("Test steel");
+        assertThat(result.getMaterial().getName()).isEqualTo("Test name");
 
         PurchaseRecordData record =
                 entityManager.find(PurchaseRecordData.class, result.getId());
@@ -60,7 +78,7 @@ public class PurchaseRecordServiceTest {
         assertThat(record.getOrderId()).isEqualTo(100L);
         assertThat(record.getQuantity()).isEqualTo(50.0);
         assertThat(record.getMaterial()).isNotNull();
-        assertThat(record.getMaterial().getName()).isEqualTo("Test steel");
+        assertThat(record.getMaterial().getName()).isEqualTo("Test name");
     }
 
     @Test
@@ -69,7 +87,7 @@ public class PurchaseRecordServiceTest {
 
         MaterialDto material = materialService.saveMaterial(
                 MaterialSaveDto.builder()
-                        .name("Test steel")
+                        .name("Test name")
                         .description("Test material")
                         .unit(Unit.KG)
                         .build()
@@ -79,7 +97,7 @@ public class PurchaseRecordServiceTest {
                 PurchaseRecordSaveDto.builder()
                         .orderId(100L)
                         .materialId(material.getId())
-                        .quantity(50.0)
+                        .quantity(BigDecimal.valueOf(50.0))
                         .build()
         );
 
@@ -93,7 +111,7 @@ public class PurchaseRecordServiceTest {
 
         assertThat(result.getMaterial()).isNotNull();
         assertThat(result.getMaterial().getId()).isEqualTo(material.getId());
-        assertThat(result.getMaterial().getName()).isEqualTo("Test steel");
+        assertThat(result.getMaterial().getName()).isEqualTo("Test name");
     }
 
     @Test
@@ -130,7 +148,7 @@ public class PurchaseRecordServiceTest {
                 PurchaseRecordSaveDto.builder()
                         .orderId(100L)
                         .materialId(material1.getId())
-                        .quantity(10.0)
+                        .quantity(BigDecimal.valueOf(10.0))
                         .build()
         );
 
@@ -139,7 +157,7 @@ public class PurchaseRecordServiceTest {
                 PurchaseRecordSaveDto.builder()
                         .orderId(200L)
                         .materialId(material2.getId())
-                        .quantity(25.0)
+                        .quantity(BigDecimal.valueOf(25.0))
                         .build()
         );
 
@@ -162,7 +180,7 @@ public class PurchaseRecordServiceTest {
 
         MaterialDto material = materialService.saveMaterial(
                 MaterialSaveDto.builder()
-                        .name("Test steel")
+                        .name("Test name")
                         .description("Test material")
                         .unit(Unit.KG)
                         .build()
@@ -174,7 +192,7 @@ public class PurchaseRecordServiceTest {
                                 PurchaseRecordSaveDto.builder()
                                         .orderId(100L)
                                         .materialId(material.getId())
-                                        .quantity(10.0)
+                                        .quantity(BigDecimal.valueOf(10.0))
                                         .build()
                         )
                 )
@@ -188,7 +206,7 @@ public class PurchaseRecordServiceTest {
 
         MaterialDto material = materialService.saveMaterial(
                 MaterialSaveDto.builder()
-                        .name("Test steel")
+                        .name("Test name")
                         .description("Test material")
                         .unit(Unit.KG)
                         .build()
@@ -198,7 +216,7 @@ public class PurchaseRecordServiceTest {
                 PurchaseRecordSaveDto.builder()
                         .orderId(100L)
                         .materialId(material.getId())
-                        .quantity(50.0)
+                        .quantity(BigDecimal.valueOf(50.0))
                         .build()
         );
 
@@ -233,7 +251,7 @@ public class PurchaseRecordServiceTest {
                                 PurchaseRecordSaveDto.builder()
                                         .orderId(100L)
                                         .materialId(999999L)
-                                        .quantity(50.0)
+                                        .quantity(BigDecimal.valueOf(50.0))
                                         .build()
                         )
                 )
@@ -247,7 +265,7 @@ public class PurchaseRecordServiceTest {
 
         MaterialDto material = materialService.saveMaterial(
                 MaterialSaveDto.builder()
-                        .name("Test steel")
+                        .name("Test name")
                         .description("Test material")
                         .unit(Unit.KG)
                         .build()
@@ -256,7 +274,7 @@ public class PurchaseRecordServiceTest {
         PurchaseRecordSaveDto dto = PurchaseRecordSaveDto.builder()
                 .orderId(100L)
                 .materialId(material.getId())
-                .quantity(50.0)
+                .quantity(BigDecimal.valueOf(50.0))
                 .build();
 
         purchaseRecordService.savePurchaseRecord(dto);
@@ -292,7 +310,7 @@ public class PurchaseRecordServiceTest {
                 PurchaseRecordSaveDto.builder()
                         .orderId(100L)
                         .materialId(steel.getId())
-                        .quantity(10.0)
+                        .quantity(BigDecimal.valueOf(10.0))
                         .build()
         );
 
@@ -300,7 +318,7 @@ public class PurchaseRecordServiceTest {
                 PurchaseRecordSaveDto.builder()
                         .orderId(100L)
                         .materialId(cable.getId())
-                        .quantity(20.0)
+                        .quantity(BigDecimal.valueOf(20.0))
                         .build()
         );
 
@@ -308,7 +326,7 @@ public class PurchaseRecordServiceTest {
                 PurchaseRecordSaveDto.builder()
                         .orderId(200L)
                         .materialId(cable.getId())
-                        .quantity(30.0)
+                        .quantity(BigDecimal.valueOf(30.0))
                         .build()
         );
 
@@ -316,9 +334,9 @@ public class PurchaseRecordServiceTest {
 
         filter.setOrderId(100L);
         filter.setMaterialName("Cable");
-        filter.setQuantityFrom(15.0);
-        filter.setQuantityTo(25.0);
-        filter.setPage(0);
+        filter.setQuantityFrom(BigDecimal.valueOf(15.0));
+        filter.setQuantityTo(BigDecimal.valueOf(25.0));
+        filter.setPage(1);
         filter.setSize(10);
 
         PurchaseRecordListResponse result =
@@ -338,7 +356,7 @@ public class PurchaseRecordServiceTest {
     @Test
     @Transactional
     void generateReport() {
-        String uniqueMaterialName = "Test steel " + java.util.UUID.randomUUID();
+        String uniqueMaterialName = "Test name " + java.util.UUID.randomUUID();
 
         MaterialDto material = materialService.saveMaterial(
                 MaterialSaveDto.builder()
@@ -352,17 +370,16 @@ public class PurchaseRecordServiceTest {
                 PurchaseRecordSaveDto.builder()
                         .orderId(100L)
                         .materialId(material.getId())
-                        .quantity(20.0)
+                        .quantity(BigDecimal.valueOf(20.0))
                         .build()
         );
 
-        PurchaseRecordFilterDto filter = new PurchaseRecordFilterDto();
+        PurchaseRecordReportFilterDto filter = new PurchaseRecordReportFilterDto();
         filter.setOrderId(100L);
         filter.setMaterialName(uniqueMaterialName);
-        filter.setQuantityFrom(15.0);
-        filter.setQuantityTo(25.0);
-        filter.setPage(0);
-        filter.setSize(10);
+        filter.setQuantityFrom(BigDecimal.valueOf(15.0));
+        filter.setQuantityTo(BigDecimal.valueOf(25.0));
+
 
         byte[] report = purchaseRecordService.generateReport(filter);
 
@@ -382,7 +399,7 @@ public class PurchaseRecordServiceTest {
 
         MaterialDto material = materialService.saveMaterial(
                 MaterialSaveDto.builder()
-                        .name("Test steel")
+                        .name("Test name")
                         .description("Test material")
                         .unit(Unit.KG)
                         .build()

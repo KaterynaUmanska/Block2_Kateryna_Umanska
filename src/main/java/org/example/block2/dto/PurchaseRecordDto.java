@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.jackson.Jacksonized;
 
+import java.math.BigDecimal;
+
 /**
  * Purchase record DTO.
  */
@@ -35,5 +37,5 @@ public class PurchaseRecordDto {
      * Purchase required material quantity.
      */
     @Schema(description = "Required material quantity", example = "15.5")
-    private Double quantity;
+    private BigDecimal quantity;
 }

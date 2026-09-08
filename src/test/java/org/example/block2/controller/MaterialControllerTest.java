@@ -2,9 +2,11 @@ package org.example.block2.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.block2.data.MaterialData;
+import org.example.block2.data.PurchaseRecordData;
 import org.example.block2.dict.Unit;
 import org.example.block2.dto.MaterialSaveDto;
 import org.example.block2.repository.MaterialRepository;
+import org.example.block2.repository.PurchaseRecordRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.math.BigDecimal;
 
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -36,9 +40,34 @@ public class MaterialControllerTest {
     @Autowired
     private MaterialRepository materialRepository;
 
+    @Autowired
+    private PurchaseRecordRepository purchaseRecordRepository;
+
     @AfterEach
     void tearDown() {
+        purchaseRecordRepository.deleteAll();
         materialRepository.deleteAll();
+    }
+
+    private MaterialData createMaterial(String name) {
+        MaterialData material = new MaterialData();
+        material.setName(name);
+        material.setDescription("Test material");
+        material.setUnit(Unit.KG);
+
+        return materialRepository.save(material);
+    }
+    private PurchaseRecordData createPurchaseRecord(
+            Long orderId,
+            MaterialData material,
+            Double quantity
+    ) {
+        PurchaseRecordData record = new PurchaseRecordData();
+        record.setOrderId(orderId);
+        record.setMaterial(material);
+        record.setQuantity(BigDecimal.valueOf(quantity));
+
+        return purchaseRecordRepository.save(record);
     }
 
     @Test
@@ -58,10 +87,7 @@ public class MaterialControllerTest {
 
     @Test
     void getMaterial_shouldReturnMaterial() throws Exception {
-        MaterialData material = new MaterialData();
-        material.setName("Test steel");
-        material.setDescription("Test material");
-        material.setUnit(Unit.KG);
+        MaterialData material = createMaterial("Test steel");
 
         MaterialData saved = materialRepository.save(material);
 
@@ -72,6 +98,19 @@ public class MaterialControllerTest {
                 .andExpect(jsonPath("$.description").value("Test material"))
                 .andExpect(jsonPath("$.unit").value("KG"));
     }
+
+    @Test
+    void getAllMaterials_shouldReturnAllMaterials() throws Exception {
+        createMaterial("Test_1");
+        createMaterial("Test_2");
+
+        mockMvc.perform(get("/api/materials")) // Замените маппинг на ваш актуальный эндпоинт получения всех материалов, например "/api/materials"
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].name").value("Test_1"))
+                .andExpect(jsonPath("$[1].name").value("Test_2"));
+    }
+
     @Test
     void getMaterial_whenNotFound_shouldReturnNotFound() throws Exception {
         mockMvc.perform(get("/api/materials/{id}", 999999L))
@@ -192,5 +231,35 @@ public class MaterialControllerTest {
     void deleteMaterial_whenNotFound_shouldReturnNotFound() throws Exception {
         mockMvc.perform(delete("/api/materials/{id}", 999999L))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updateMaterial_withDuplicateName_shouldReturnConflict() throws Exception {
+
+        MaterialData material1 = createMaterial("Steel");
+
+        MaterialData material2 = createMaterial("Copper");
+
+        MaterialSaveDto request = MaterialSaveDto.builder()
+                .name("Steel")
+                .description("Updated description")
+                .unit(Unit.KG)
+                .build();
+
+        mockMvc.perform(put("/api/materials/{id}", material2.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void deleteMaterial_whenReferencedByPurchaseRecord_shouldReturnConflict() throws Exception {
+
+        MaterialData material = createMaterial("Steel");
+
+        createPurchaseRecord(100L, material, 10.0);
+
+        mockMvc.perform(delete("/api/materials/{id}", material.getId()))
+                .andExpect(status().isConflict());
     }
 }

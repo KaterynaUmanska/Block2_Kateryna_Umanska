@@ -1,8 +1,6 @@
 package org.example.block2.dto;
 
 import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,12 +8,11 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 /**
- * DTO for filtering purchase records.
+ * DTO for reports.
  */
 @Getter
 @Setter
-public class PurchaseRecordFilterDto {
-
+public class PurchaseRecordReportFilterDto {
     /**
      * ID of the purchase order.
      */
@@ -37,18 +34,6 @@ public class PurchaseRecordFilterDto {
      */
     @PositiveOrZero(message = "Quantity to must be positive or zero")
     private BigDecimal quantityTo;
-
-    /**
-     * Page number for pagination.
-     */
-    @Min(1)
-    private int page = 1;
-
-    /**
-     * Number of items per page.
-     */
-    @Min(1)
-    private int size = 10;
 
     @AssertTrue(message = "quantityFrom must be less than or equal to quantityTo")
     private boolean isQuantityRangeValid() {

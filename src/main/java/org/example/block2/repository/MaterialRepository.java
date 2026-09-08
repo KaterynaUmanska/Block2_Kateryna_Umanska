@@ -12,7 +12,7 @@ public interface MaterialRepository extends JpaRepository<MaterialData, Long> {
      * @param name material name
      * @return material if found
      */
-    Optional<MaterialData> findByName(String name);
+    Optional<MaterialData> findByNameIgnoreCase(String name);
 
     /**
      * Checks whether material with the given name exists.

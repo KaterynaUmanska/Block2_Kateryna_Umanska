@@ -28,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import org.springframework.mock.web.MockMultipartFile;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
 @SpringBootTest
@@ -73,7 +74,7 @@ public class PurchaseRecordControllerTest {
         PurchaseRecordData record = new PurchaseRecordData();
         record.setOrderId(orderId);
         record.setMaterial(material);
-        record.setQuantity(quantity);
+        record.setQuantity(BigDecimal.valueOf(quantity));
 
         return purchaseRecordRepository.save(record);
     }
@@ -85,7 +86,7 @@ public class PurchaseRecordControllerTest {
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .orderId(100L)
                 .materialId(material.getId())
-                .quantity(25.5)
+                .quantity(BigDecimal.valueOf(25.5))
                 .build();
 
         mockMvc.perform(post("/api/purchases")
@@ -102,7 +103,7 @@ public class PurchaseRecordControllerTest {
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .orderId(200L)
                 .materialId(material.getId())
-                .quantity(10.0)
+                .quantity(BigDecimal.valueOf(10.0))
                 .build();
 
         mockMvc.perform(post("/api/purchases")
@@ -118,7 +119,7 @@ public class PurchaseRecordControllerTest {
 
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .materialId(material.getId())
-                .quantity(10.0)
+                .quantity(BigDecimal.valueOf(10.0))
                 .build();
 
         mockMvc.perform(post("/api/purchases")
@@ -131,7 +132,7 @@ public class PurchaseRecordControllerTest {
     void createPurchaseRecord_withoutMaterialId_shouldReturnBadRequest() throws Exception {
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .orderId(100L)
-                .quantity(10.0)
+                .quantity(BigDecimal.valueOf(10.0))
                 .build();
 
         mockMvc.perform(post("/api/purchases")
@@ -162,7 +163,7 @@ public class PurchaseRecordControllerTest {
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .orderId(100L)
                 .materialId(material.getId())
-                .quantity(0.0)
+                .quantity(BigDecimal.valueOf(0.0))
                 .build();
 
         mockMvc.perform(post("/api/purchases")
@@ -176,7 +177,7 @@ public class PurchaseRecordControllerTest {
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .orderId(100L)
                 .materialId(999999L)
-                .quantity(10.0)
+                .quantity(BigDecimal.valueOf(10.0))
                 .build();
 
         mockMvc.perform(post("/api/purchases")
@@ -192,7 +193,7 @@ public class PurchaseRecordControllerTest {
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .orderId(100L)
                 .materialId(material.getId())
-                .quantity(10.0)
+                .quantity(BigDecimal.valueOf(10.0))
                 .build();
 
         mockMvc.perform(post("/api/purchases")
@@ -213,7 +214,7 @@ public class PurchaseRecordControllerTest {
         PurchaseRecordData purchaseRecord = new PurchaseRecordData();
         purchaseRecord.setOrderId(100L);
         purchaseRecord.setMaterial(material);
-        purchaseRecord.setQuantity(25.5);
+        purchaseRecord.setQuantity(BigDecimal.valueOf(25.5));
 
         PurchaseRecordData saved = purchaseRecordRepository.save(purchaseRecord);
 
@@ -240,14 +241,14 @@ public class PurchaseRecordControllerTest {
         PurchaseRecordData purchaseRecord = new PurchaseRecordData();
         purchaseRecord.setOrderId(100L);
         purchaseRecord.setMaterial(material);
-        purchaseRecord.setQuantity(10.0);
+        purchaseRecord.setQuantity(BigDecimal.valueOf(10.0));
 
         PurchaseRecordData saved = purchaseRecordRepository.save(purchaseRecord);
 
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .orderId(200L)
                 .materialId(material.getId())
-                .quantity(50.0)
+                .quantity(BigDecimal.valueOf(50.0))
                 .build();
 
         mockMvc.perform(put("/api/purchases/{id}", saved.getId())
@@ -260,7 +261,7 @@ public class PurchaseRecordControllerTest {
                 .orElseThrow();
 
         assertEquals(200L, updated.getOrderId());
-        assertEquals(50.0, updated.getQuantity());
+        assertEquals(0, BigDecimal.valueOf(50.0).compareTo(updated.getQuantity()));
         assertEquals(material.getId(), updated.getMaterial().getId());
     }
 
@@ -278,14 +279,14 @@ public class PurchaseRecordControllerTest {
         PurchaseRecordData purchaseRecord = new PurchaseRecordData();
         purchaseRecord.setOrderId(100L);
         purchaseRecord.setMaterial(firstMaterial);
-        purchaseRecord.setQuantity(10.0);
+        purchaseRecord.setQuantity(BigDecimal.valueOf(10.0));
 
         PurchaseRecordData saved = purchaseRecordRepository.save(purchaseRecord);
 
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .orderId(100L)
                 .materialId(secondMaterial.getId())
-                .quantity(20.0)
+                .quantity(BigDecimal.valueOf(20.0))
                 .build();
 
         mockMvc.perform(put("/api/purchases/{id}", saved.getId())
@@ -298,7 +299,7 @@ public class PurchaseRecordControllerTest {
                 .orElseThrow();
 
         assertEquals(secondMaterial.getId(), updated.getMaterial().getId());
-        assertEquals(20.0, updated.getQuantity());
+        assertEquals(0, BigDecimal.valueOf(20.0).compareTo(updated.getQuantity()));
     }
 
     @Test
@@ -308,7 +309,7 @@ public class PurchaseRecordControllerTest {
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .orderId(100L)
                 .materialId(material.getId())
-                .quantity(20.0)
+                .quantity(BigDecimal.valueOf(20.0))
                 .build();
 
         mockMvc.perform(put("/api/purchases/{id}", 999999L)
@@ -324,14 +325,14 @@ public class PurchaseRecordControllerTest {
         PurchaseRecordData purchaseRecord = new PurchaseRecordData();
         purchaseRecord.setOrderId(100L);
         purchaseRecord.setMaterial(material);
-        purchaseRecord.setQuantity(10.0);
+        purchaseRecord.setQuantity(BigDecimal.valueOf(10.0));
 
         PurchaseRecordData saved = purchaseRecordRepository.save(purchaseRecord);
 
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .orderId(200L)
                 .materialId(material.getId())
-                .quantity(-5.0)
+                .quantity(BigDecimal.valueOf(-5.0))
                 .build();
 
         mockMvc.perform(put("/api/purchases/{id}", saved.getId())
@@ -347,7 +348,7 @@ public class PurchaseRecordControllerTest {
         PurchaseRecordData purchaseRecord = new PurchaseRecordData();
         purchaseRecord.setOrderId(100L);
         purchaseRecord.setMaterial(material);
-        purchaseRecord.setQuantity(10.0);
+        purchaseRecord.setQuantity(BigDecimal.valueOf(10.0));
 
         PurchaseRecordData saved = purchaseRecordRepository.save(purchaseRecord);
 
@@ -373,7 +374,7 @@ public class PurchaseRecordControllerTest {
 
         String request = """
             {
-                "page": 0,
+                "page": 1,
                 "size": 2
             }
             """;
@@ -398,7 +399,7 @@ public class PurchaseRecordControllerTest {
         String request = """
             {
                 "orderId": 100,
-                "page": 0,
+                "page": 1,
                 "size": 20
             }
             """;
@@ -428,7 +429,7 @@ public class PurchaseRecordControllerTest {
         String request = """
             {
                 "materialName": "Test cable",
-                "page": 0,
+                "page": 1,
                 "size": 20
             }
             """;
@@ -454,7 +455,7 @@ public class PurchaseRecordControllerTest {
             {
                 "quantityFrom": 10,
                 "quantityTo": 30,
-                "page": 0,
+                "page": 1,
                 "size": 20
             }
             """;
@@ -482,7 +483,7 @@ public class PurchaseRecordControllerTest {
                 "materialName": "Test steel",
                 "quantityFrom": 15,
                 "quantityTo": 25,
-                "page": 0,
+                "page": 1,
                 "size": 20
             }
             """;
@@ -504,7 +505,7 @@ public class PurchaseRecordControllerTest {
 
         String request = """
             {
-                "page": 0,
+                "page": 1,
                 "size": 20
             }
             """;
@@ -542,7 +543,7 @@ public class PurchaseRecordControllerTest {
         String request = """
             {
                 "orderId": 100,
-                "page": 0,
+                "page": 1,
                 "size": 20
             }
             """;
@@ -564,19 +565,19 @@ public class PurchaseRecordControllerTest {
         MaterialData material = createMaterial();
 
         String json = """
-            [
-                {
-                    "orderId": 100,
-                    "materialId": %d,
-                    "quantity": 10.5
-                },
-                {
-                    "orderId": 101,
-                    "materialId": %d,
-                    "quantity": 20.0
-                }
-            ]
-            """.formatted(material.getId(), material.getId());
+        [
+            {
+                "orderId": 100,
+                "materialId": %d,
+                "quantity": 10.5
+            },
+            {
+                "orderId": 101,
+                "materialId": %d,
+                "quantity": 20.0
+            }
+        ]
+        """.formatted(material.getId(), material.getId());
 
         MockMultipartFile file = new MockMultipartFile(
                 "file",
@@ -604,6 +605,79 @@ public class PurchaseRecordControllerTest {
         MaterialData material = createMaterial();
 
         String json = """
+    [
+        {
+            "orderId": 100,
+            "materialId": %d,
+            "quantity": 10.5
+        },
+        {
+            "orderId": 101,
+            "materialId": %d,
+            "quantity": -5.0
+        }
+    ]
+    """.formatted(material.getId(), material.getId());
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "purchases.json",
+                MediaType.APPLICATION_JSON_VALUE,
+                json.getBytes(StandardCharsets.UTF_8)
+        );
+
+        mockMvc.perform(
+                        multipart("/api/purchases/upload")
+                                .file(file)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.successful").value(1))
+                .andExpect(jsonPath("$.failed").value(1));
+
+        assertEquals(
+                1,
+                purchaseRecordRepository.count()
+        );
+    }
+
+    @Test
+    void upload_withNonExistingMaterial_shouldCountAsFailed() throws Exception {
+        String json = """
+        [
+            {
+                "orderId": 100,
+                "materialId": 999999,
+                "quantity": 10.5
+            }
+        ]
+        """;
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "purchases.json",
+                MediaType.APPLICATION_JSON_VALUE,
+                json.getBytes(StandardCharsets.UTF_8)
+        );
+
+        mockMvc.perform(
+                        multipart("/api/purchases/upload")
+                                .file(file)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.successful").value(0))
+                .andExpect(jsonPath("$.failed").value(1));
+
+        assertEquals(
+                0,
+                purchaseRecordRepository.count()
+        );
+    }
+
+    @Test
+    void upload_withDuplicateRecords_shouldPartiallyImport() throws Exception {
+        MaterialData material = createMaterial();
+
+        String json = """
         [
             {
                 "orderId": 100,
@@ -611,9 +685,9 @@ public class PurchaseRecordControllerTest {
                 "quantity": 10.5
             },
             {
-                "orderId": 101,
+                "orderId": 100,
                 "materialId": %d,
-                "quantity": -5.0
+                "quantity": 20.0
             }
         ]
         """.formatted(material.getId(), material.getId());
@@ -638,78 +712,4 @@ public class PurchaseRecordControllerTest {
                 purchaseRecordRepository.count()
         );
     }
-
-    @Test
-    void upload_withNonExistingMaterial_shouldReturnNotFound() throws Exception {
-        String json = """
-            [
-                {
-                    "orderId": 100,
-                    "materialId": 999999,
-                    "quantity": 10.5
-                }
-            ]
-            """;
-
-        MockMultipartFile file = new MockMultipartFile(
-                "file",
-                "purchases.json",
-                MediaType.APPLICATION_JSON_VALUE,
-                json.getBytes(StandardCharsets.UTF_8)
-        );
-
-        mockMvc.perform(
-                        multipart("/api/purchases/upload")
-                                .file(file)
-                )
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.title").exists())
-                .andExpect(jsonPath("$.status").value(404));
-
-        assertEquals(
-                0,
-                purchaseRecordRepository.count()
-        );
-    }
-
-    @Test
-    void upload_withDuplicateRecords_shouldReturnConflict() throws Exception {
-        MaterialData material = createMaterial();
-
-        String json = """
-            [
-                {
-                    "orderId": 100,
-                    "materialId": %d,
-                    "quantity": 10.5
-                },
-                {
-                    "orderId": 100,
-                    "materialId": %d,
-                    "quantity": 20.0
-                }
-            ]
-            """.formatted(material.getId(), material.getId());
-
-        MockMultipartFile file = new MockMultipartFile(
-                "file",
-                "purchases.json",
-                MediaType.APPLICATION_JSON_VALUE,
-                json.getBytes(StandardCharsets.UTF_8)
-        );
-
-        mockMvc.perform(
-                        multipart("/api/purchases/upload")
-                                .file(file)
-                )
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.title").value("Resource already exists"))
-                .andExpect(jsonPath("$.status").value(409));
-
-        assertEquals(
-                0,
-                purchaseRecordRepository.count()
-        );
-    }
-
 }

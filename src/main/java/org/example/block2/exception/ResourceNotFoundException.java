@@ -1,4 +1,4 @@
-package org.example.block2.exeption;
+package org.example.block2.exception;
 
 public class ResourceNotFoundException  extends RuntimeException {
     public ResourceNotFoundException(String message) {

@@ -1,4 +1,4 @@
-package org.example.block2.exeption;
+package org.example.block2.exception;
 
 /**
  * Exception thrown when resource conflicts with an existing resource.

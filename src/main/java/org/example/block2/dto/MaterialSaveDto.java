@@ -23,7 +23,7 @@ public class MaterialSaveDto {
      */
     @NotBlank(message = "Name cannot be blank")
     @Size(max = 255, message = "Name must be up to 255 characters")
-    @Schema(description = "Unique material name", example = "Material_1", required = true)
+    @Schema(description = "Unique material name", example = "Material_1")
     private String name;
 
     /**
@@ -36,6 +36,6 @@ public class MaterialSaveDto {
      * Material unit.
      */
     @NotNull(message = "Unit cannot be null")
-    @Schema(description = "Material units of measurement", example = "KG", required = true)
+    @Schema(description = "Material units of measurement", example = "KG")
     private Unit unit;
 }

@@ -3,38 +3,31 @@ package org.example.block2.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.block2.data.MaterialData;
 import org.example.block2.data.PurchaseRecordData;
 import org.example.block2.dto.*;
-import org.example.block2.exeption.DuplicateResourceException;
-import org.example.block2.exeption.ResourceNotFoundException;
+import org.example.block2.exception.DuplicateResourceException;
+import org.example.block2.exception.ResourceNotFoundException;
 import org.example.block2.monitor.Monitored;
 import org.example.block2.repository.MaterialRepository;
 import org.example.block2.repository.PurchaseRecordRepository;
+import org.example.block2.repository.PurchaseRecordSpecifications;
 import org.example.block2.utils.JsonStreamParser;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.validation.Validator;
-import org.example.block2.dto.PurchaseRecordProcessingResult;
-import org.example.block2.dto.PurchaseRecordSaveDto;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicInteger;
-
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Service for purchase record processing operations.
@@ -47,6 +40,7 @@ public class PurchaseRecordService {
     private final PurchaseRecordRepository purchaseRecordRepository;
     private final MaterialRepository materialRepository;
     private final CsvReportService csvReportService;
+    private final PurchaseRecordImportService purchaseRecordImportService;
     private final ObjectMapper objectMapper;
     private final Validator validator;
 
@@ -58,7 +52,7 @@ public class PurchaseRecordService {
      *
      * @param dto purchase record data
      * @return created purchase record DTO
-     * @throws IllegalArgumentException if duplicate or invalid data
+     * @throws DuplicateResourceException if duplicate or invalid data
      */
     @Transactional
     public PurchaseRecordDto savePurchaseRecord(PurchaseRecordSaveDto dto) {
@@ -73,12 +67,12 @@ public class PurchaseRecordService {
 
         try {
             PurchaseRecordData saved = purchaseRecordRepository.save(data);
-            entityManager.flush(); // Примусово виконуємо запит у БД, щоб зловити унікальні обмеження
+            entityManager.flush();
 
             log.info("Successfully saved purchase record with ID: {}", saved.getId());
             return convertToDto(saved);
 
-        } catch (PersistenceException | DataIntegrityViolationException ex) {
+        } catch (DataIntegrityViolationException ex) {
             String message = ex.getMessage();
             if (message != null && message.toLowerCase().contains("uk_order_material")) {
                 throw new DuplicateResourceException(
@@ -149,15 +143,12 @@ public class PurchaseRecordService {
 
         MaterialData material = findMaterial(dto.getMaterialId());
 
-        if (dto.getOrderId() != null) {
-            record.setOrderId(dto.getOrderId());
-        }
+        record.setOrderId(dto.getOrderId());
         record.setMaterial(material);
-        if (dto.getQuantity() != null) {
-            record.setQuantity(dto.getQuantity());
-        }
+        record.setQuantity(dto.getQuantity());
 
         purchaseRecordRepository.save(record);
+
         log.info("Successfully updated purchase record with ID: {}", id);
     }
 
@@ -182,6 +173,7 @@ public class PurchaseRecordService {
 
         log.info("Successfully deleted purchase record with ID: {}", id);
     }
+
     /**
      * Returns filtered purchase records with pagination.
      *
@@ -210,19 +202,19 @@ public class PurchaseRecordService {
             materialName = null;
         }
 
+        Specification<PurchaseRecordData> spec = Specification
+                .where(PurchaseRecordSpecifications.hasOrderId(filter.getOrderId()))
+                .and(PurchaseRecordSpecifications.hasMaterialName(materialName))
+                .and(PurchaseRecordSpecifications.quantityGreaterThanOrEqualTo(filter.getQuantityFrom()))
+                .and(PurchaseRecordSpecifications.quantityLessThanOrEqualTo(filter.getQuantityTo()));
+
         Pageable pageable = PageRequest.of(
-                filter.getPage(),
+                filter.getPage() - 1,
                 filter.getSize()
         );
 
         Page<PurchaseRecordData> result =
-                purchaseRecordRepository.findByFilters(
-                        filter.getOrderId(),
-                        materialName,
-                        filter.getQuantityFrom(),
-                        filter.getQuantityTo(),
-                        pageable
-                );
+                purchaseRecordRepository.findAll(spec, pageable);
 
         List<PurchaseRecordListDto> records = result.getContent()
                 .stream()
@@ -305,6 +297,7 @@ public class PurchaseRecordService {
         result.setQuantity(dto.getQuantity());
         return result;
     }
+
     /**
      * Converts entity to reduced list DTO.
      *
@@ -312,13 +305,12 @@ public class PurchaseRecordService {
      * @return reduced purchase record DTO
      */
     private static PurchaseRecordListDto convertToListDto(PurchaseRecordData data) {
-
         return new PurchaseRecordListDto(data.getId(), data.getOrderId(), data.getMaterial().getName(), data.getQuantity());
     }
 
     @Transactional(readOnly = true)
     @Monitored
-    public byte[] generateReport(PurchaseRecordFilterDto filter) {
+    public byte[] generateReport(PurchaseRecordReportFilterDto filter) {
 
         log.info(
                 "Generating purchase records report with filters: orderId={}, materialName={}, quantityFrom={}, quantityTo={}",
@@ -334,7 +326,13 @@ public class PurchaseRecordService {
             materialName = null;
         }
 
-        List<PurchaseRecordData> records = purchaseRecordRepository.findAllByFilters(filter.getOrderId(), materialName, filter.getQuantityFrom(), filter.getQuantityTo());
+        Specification<PurchaseRecordData> spec = Specification
+                .where(PurchaseRecordSpecifications.hasOrderId(filter.getOrderId()))
+                .and(PurchaseRecordSpecifications.hasMaterialName(materialName))
+                .and(PurchaseRecordSpecifications.quantityGreaterThanOrEqualTo(filter.getQuantityFrom()))
+                .and(PurchaseRecordSpecifications.quantityLessThanOrEqualTo(filter.getQuantityTo()));
+
+        List<PurchaseRecordData> records = purchaseRecordRepository.findAll(spec);
 
         byte[] report = csvReportService.generatePurchaseRecordsReport(records);
 
@@ -350,16 +348,22 @@ public class PurchaseRecordService {
         }
 
         try {
-            savePurchaseRecord(dto);
+            purchaseRecordImportService.saveSingleRecordSafely(dto);
             return true;
-        } catch (IllegalArgumentException e) {
+
+        } catch (ResourceNotFoundException
+                 | DuplicateResourceException
+                 | IllegalArgumentException e) {
+
             log.warn(
                     "Purchase record was not imported: {}",
                     e.getMessage()
             );
+
             return false;
         }
     }
+
     @Transactional
     public PurchaseRecordProcessingResult importPurchaseRecords(
             InputStream inputStream
@@ -383,6 +387,4 @@ public class PurchaseRecordService {
                 .failed(failed.get())
                 .build();
     }
-
-
 }

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.block2.data.PurchaseRecordData;
 import org.example.block2.dto.PurchaseRecordSaveDto;
 
 import java.io.IOException;

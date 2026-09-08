@@ -3,9 +3,11 @@ package org.example.block2.service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceException;
+import jakarta.validation.ConstraintViolationException;
 import org.example.block2.dto.MaterialDto;
-import org.example.block2.exeption.DuplicateResourceException;
-import org.example.block2.exeption.ResourceNotFoundException;
+import org.example.block2.exception.DuplicateResourceException;
+import org.example.block2.exception.ResourceNotFoundException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -35,30 +37,23 @@ public class MaterialService {
      *
      * @param dto material save DTO
      * @return created material DTO
-     * @throws IllegalArgumentException if duplicate name or invalid data
+     * @throws DuplicateResourceException if duplicate name or invalid data
      */
     @Transactional
     public MaterialDto saveMaterial(MaterialSaveDto dto) {
         log.info("Attempting to save new material with name: '{}'", dto.getName());
 
-        MaterialData material = convertToData(dto);
-
-        try {
-            MaterialData saved = materialRepository.save(material);
-            entityManager.flush(); // Примусово виконуємо запит у БД, щоб зловити унікальне обмеження на ім'я
-
-            log.info("Successfully saved material with ID: {}", saved.getId());
-            return convertToDto(saved);
-
-        } catch (PersistenceException | DataIntegrityViolationException ex) {
-            String message = ex.getMessage();
-            if (message != null && (message.toLowerCase().contains("material") || message.toLowerCase().contains("name"))) {
-                throw new DuplicateResourceException(
-                        "Material with name '%s' already exists".formatted(dto.getName())
-                );
-            }
-            throw ex;
+        if (materialRepository.existsByNameIgnoreCase(dto.getName())) {
+            throw new DuplicateResourceException(
+                    "Material with name '%s' already exists".formatted(dto.getName())
+            );
         }
+
+        MaterialData material = convertToData(dto);
+        MaterialData saved = materialRepository.save(material);
+
+        log.info("Successfully saved material with ID: {}", saved.getId());
+        return convertToDto(saved);
     }
 
     /**
@@ -118,6 +113,15 @@ public class MaterialService {
                     );
                 });
 
+        materialRepository.findByNameIgnoreCase(dto.getName())
+                .ifPresent(existing -> {
+                   if (!existing.getId().equals(id)) {
+                        throw new DuplicateResourceException(
+                                "Material with name '%s' already exists".formatted(dto.getName())
+                        );
+                    }
+                });
+
         if (dto.getName() != null) {
             material.setName(dto.getName());
         }
@@ -126,22 +130,9 @@ public class MaterialService {
         }
         material.setDescription(dto.getDescription());
 
-        try {
-            materialRepository.save(material);
-            entityManager.flush();
-
-            log.info("Successfully updated material with ID: {}", id);
-        } catch (PersistenceException | DataIntegrityViolationException ex) {
-            String message = ex.getMessage();
-            if (message != null && (message.toLowerCase().contains("material") || message.toLowerCase().contains("name"))) {
-                throw new DuplicateResourceException(
-                        "Material with name '%s' already exists".formatted(dto.getName())
-                );
-            }
-            throw ex;
-        }
+        materialRepository.save(material);
+        log.info("Successfully updated material with ID: {}", id);
     }
-
     /**
      * Deletes material by ID.
      *
@@ -154,16 +145,13 @@ public class MaterialService {
         MaterialData material = materialRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Material with ID {} not found", id);
-                    return new ResourceNotFoundException(
-                            "Material not found with id: " + id
-                    );
+                    return new ResourceNotFoundException("Material not found with id: " + id);
                 });
 
         materialRepository.delete(material);
-
+        entityManager.flush();
         log.info("Successfully deleted material with ID: {}", id);
     }
-
     /**
      * Converts entity to DTO.
      *
