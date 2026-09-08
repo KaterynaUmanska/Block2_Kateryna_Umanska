@@ -11,6 +11,7 @@ import org.example.block2.data.PurchaseRecordData;
 import org.example.block2.dto.*;
 import org.example.block2.exeption.DuplicateResourceException;
 import org.example.block2.exeption.ResourceNotFoundException;
+import org.example.block2.monitor.Monitored;
 import org.example.block2.repository.MaterialRepository;
 import org.example.block2.repository.PurchaseRecordRepository;
 import org.example.block2.utils.JsonStreamParser;
@@ -120,7 +121,7 @@ public class PurchaseRecordService {
         PurchaseRecordData data = purchaseRecordRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Purchase record with ID {} not found", id);
-                    return new IllegalArgumentException(
+                    return new ResourceNotFoundException(
                             "Purchase record not found with id: " + id
                     );
                 });
@@ -141,7 +142,7 @@ public class PurchaseRecordService {
         PurchaseRecordData record = purchaseRecordRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Purchase record with ID {} not found", id);
-                    return new IllegalArgumentException(
+                    return new ResourceNotFoundException(
                             "Purchase record not found with id: " + id
                     );
                 });
@@ -172,7 +173,7 @@ public class PurchaseRecordService {
         PurchaseRecordData record = purchaseRecordRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Purchase record with ID {} not found", id);
-                    return new IllegalArgumentException(
+                    return new ResourceNotFoundException(
                             "Purchase record not found with id: " + id
                     );
                 });
@@ -188,6 +189,7 @@ public class PurchaseRecordService {
      * @return paginated list of purchase records
      */
     @Transactional(readOnly = true)
+    @Monitored
     public PurchaseRecordListResponse getPurchaseRecords(
             PurchaseRecordFilterDto filter) {
 
@@ -315,6 +317,7 @@ public class PurchaseRecordService {
     }
 
     @Transactional(readOnly = true)
+    @Monitored
     public byte[] generateReport(PurchaseRecordFilterDto filter) {
 
         log.info(

@@ -53,8 +53,8 @@ public class MaterialService {
         } catch (PersistenceException | DataIntegrityViolationException ex) {
             String message = ex.getMessage();
             if (message != null && (message.toLowerCase().contains("material") || message.toLowerCase().contains("name"))) {
-                throw new IllegalArgumentException(
-                        "Material with name '%s' already exists".formatted(dto.getName()), ex
+                throw new DuplicateResourceException(
+                        "Material with name '%s' already exists".formatted(dto.getName())
                 );
             }
             throw ex;
@@ -113,7 +113,7 @@ public class MaterialService {
         MaterialData material = materialRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Material with ID {} not found", id);
-                    return new IllegalArgumentException(
+                    return new ResourceNotFoundException(
                             "Material not found with id: " + id
                     );
                 });
@@ -154,7 +154,7 @@ public class MaterialService {
         MaterialData material = materialRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Material with ID {} not found", id);
-                    return new IllegalArgumentException(
+                    return new ResourceNotFoundException(
                             "Material not found with id: " + id
                     );
                 });
