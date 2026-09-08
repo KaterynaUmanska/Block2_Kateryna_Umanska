@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Service for importing individual purchase records.
  */
+
 @Service
 @RequiredArgsConstructor
 public class PurchaseRecordImportService {
@@ -51,8 +52,6 @@ public class PurchaseRecordImportService {
         try {
             purchaseRecordRepository.save(data);
 
-            // Force INSERT so the unique constraint is checked
-            // inside this independent transaction.
             entityManager.flush();
 
         } catch (DataIntegrityViolationException ex) {
