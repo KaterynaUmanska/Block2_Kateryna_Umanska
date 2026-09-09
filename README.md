@@ -28,6 +28,7 @@ Material (матеріал) - другорядна сутність, яка мі
 
 Додатково для PurchaseRecord встановлено обмеження унікальності комбінації:
 order_id + material_id
+
 Тобто один і той самий матеріал не може бути доданий до одного виробничого замовлення більше одного разу.
 
 Сутність PurchaseOrder використовується лише для збереження ідентифікатора виробничого замовлення orderId у PurchaseRecord та не входить до переліку сутностей, які необхідно реалізувати в межах цього завдання.
@@ -40,20 +41,20 @@ docs/database-schema.md
 
 ## REST API
 ### PurchaseRecord
-POST /api/purchase-records - Створити запис про покупку
-GET /api/purchase-records/{id} - Отримати запис про покупку за ID
-PUT /api/purchase-records/{id} - Оновити запис про покупку
-DELETE /api/purchase-records/{id} - Видалити запис про покупку
-POST /api/purchase-records/_list - Отримати відфільтрований список із пагінацією
-POST /api/purchase-records/_report - Згенерувати звіт у форматі CSV
-POST /api/purchase-records/upload - Імпортувати записи про покупки з JSON
+* POST /api/purchase-records - Створити запис про покупку
+* GET /api/purchase-records/{id} - Отримати запис про покупку за ID
+* PUT /api/purchase-records/{id} - Оновити запис про покупку
+* DELETE /api/purchase-records/{id} - Видалити запис про покупку
+* POST /api/purchase-records/_list - Отримати відфільтрований список із пагінацією
+* POST /api/purchase-records/_report - Згенерувати звіт у форматі CSV
+* POST /api/purchase-records/upload - Імпортувати записи про покупки з JSON
 
 ### Material
-GET /api/materials - Отримати всі матеріали
-GET /api/materials/{id} - Отримати матеріал за ID
-POST /api/materials - Створити новий матеріал
-PUT /api/materials/{id} - Оновити матеріал
-DELETE /api/materials/{id} - Видалити матеріал
+* GET /api/materials - Отримати всі матеріали
+* GET /api/materials/{id} - Отримати матеріал за ID
+* POST /api/materials - Створити новий матеріал
+* PUT /api/materials/{id} - Оновити матеріал
+* DELETE /api/materials/{id} - Видалити матеріал
 
 ## Фільтрація та пагінація
 Кінцева точка (ендпоінт) списку записів про покупки підтримує необов'язкові фільтри:
