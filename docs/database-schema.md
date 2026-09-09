@@ -60,16 +60,6 @@ Stores individual purchase positions belonging to production orders.
 * The relationship is implemented through the `material_id` foreign key.
 * The foreign key references `materials.id`.
 
-```text
-materials.id
-     │
-     │ 1
-     │
-     │
-     │ N
-purchase_records.material_id
-```
-
 ## Constraints
 
 ### Material name uniqueness
@@ -119,40 +109,6 @@ No separate index is created for `quantity`.
 
 The `quantity` field is used for optional range filtering. An additional index is not required for the current application workload and dataset size. Indexing decisions should be based on query selectivity and actual database workload rather than on the data type alone.
 
-## Database Schema Management
-
-Database schema creation and initial data insertion are handled by **Liquibase**.
-
-The application uses:
-
-```properties
-spring.jpa.hibernate.ddl-auto=validate
-```
-
-Hibernate therefore validates the existing database schema instead of creating or modifying it.
-
-Liquibase is responsible for:
-
-* creating the `materials` table;
-* creating the `purchase_records` table;
-* creating primary keys;
-* creating foreign keys;
-* creating unique constraints;
-* creating indexes;
-* inserting initial material data.
-
-## Seed Data
-
-The database is initialized with several materials when the application starts through Liquibase migrations.
-
-Example materials include:
-
-* Steel Beam
-* Cement
-* Copper Wire
-
-The exact seed data is defined in the Liquibase changelog.
-
 ## Database-related Application Flow
 
 1. A `Material` is created and stored in the `materials` table.
@@ -164,18 +120,3 @@ The exact seed data is defined in the Liquibase changelog.
 7. Reports use the same filtering logic and contain all matching purchase records.
 8. JSON import validates individual records and persists valid records.
 
-## Entity Model
-
-The database corresponds to the following application model:
-
-```text
-PurchaseRecord
-    │
-    │ Many-to-One
-    ▼
-Material
-```
-
-`PurchaseRecord` is the main entity of the project.
-
-`Material` is the secondary entity referenced by `PurchaseRecord`.
