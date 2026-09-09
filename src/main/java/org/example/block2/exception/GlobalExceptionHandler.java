@@ -1,6 +1,7 @@
 package org.example.block2.exception;
 
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 /**
  * Global exception handler for REST API.
  */
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     /**
@@ -115,6 +117,16 @@ public class GlobalExceptionHandler {
 
         problemDetail.setTitle("Conflict violation");
         problemDetail.setDetail("Resource cannot be modified or deleted because it is referenced by other records.");
+
+        return problemDetail;
+    }
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ProblemDetail handleIllegalArgumentException(IllegalArgumentException ex) {
+        log.warn("Illegal argument exception: {}", ex.getMessage());
+
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problemDetail.setTitle("Invalid Request");
+        problemDetail.setDetail(ex.getMessage());
 
         return problemDetail;
     }

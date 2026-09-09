@@ -32,6 +32,7 @@ import java.util.List;
 /**
  * Service for purchase record processing operations.
  */
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -73,14 +74,10 @@ public class PurchaseRecordService {
             return convertToDto(saved);
 
         } catch (DataIntegrityViolationException ex) {
-            String message = ex.getMessage();
-            if (message != null && message.toLowerCase().contains("uk_order_material")) {
-                throw new DuplicateResourceException(
-                        "Purchase record for order ID '%d' and material ID '%d' already exists"
-                                .formatted(dto.getOrderId(), dto.getMaterialId())
-                );
-            }
-            throw ex;
+            throw new DuplicateResourceException(
+                    "Purchase record for order ID '%d' and material ID '%d' already exists"
+                            .formatted(dto.getOrderId(), dto.getMaterialId())
+            );
         }
     }
 
@@ -147,9 +144,17 @@ public class PurchaseRecordService {
         record.setMaterial(material);
         record.setQuantity(dto.getQuantity());
 
-        purchaseRecordRepository.save(record);
+        try {
+            purchaseRecordRepository.save(record);
+            entityManager.flush();
 
-        log.info("Successfully updated purchase record with ID: {}", id);
+            log.info("Successfully updated purchase record with ID: {}", id);
+        } catch (DataIntegrityViolationException ex) {
+            throw new DuplicateResourceException(
+                    "Purchase record for order ID '%d' and material ID '%d' already exists"
+                            .formatted(dto.getOrderId(), dto.getMaterialId())
+            );
+        }
     }
 
     /**
@@ -183,7 +188,7 @@ public class PurchaseRecordService {
     @Transactional(readOnly = true)
     @Monitored
     public PurchaseRecordListResponse getPurchaseRecords(
-            PurchaseRecordFilterDto filter) {
+            PurchaseRecordListFilterDto filter) {
 
         log.debug(
                 "Fetching purchase records with filters: orderId={}, materialName={}, " +
@@ -310,7 +315,7 @@ public class PurchaseRecordService {
 
     @Transactional(readOnly = true)
     @Monitored
-    public byte[] generateReport(PurchaseRecordReportFilterDto filter) {
+    public byte[] generateReport(PurchaseRecordFilterDto filter) {
 
         log.info(
                 "Generating purchase records report with filters: orderId={}, materialName={}, quantityFrom={}, quantityTo={}",

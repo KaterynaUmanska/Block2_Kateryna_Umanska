@@ -2,13 +2,9 @@ package org.example.block2.service;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.PersistenceException;
-import jakarta.validation.ConstraintViolationException;
 import org.example.block2.dto.MaterialDto;
 import org.example.block2.exception.DuplicateResourceException;
 import org.example.block2.exception.ResourceNotFoundException;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -122,12 +118,8 @@ public class MaterialService {
                     }
                 });
 
-        if (dto.getName() != null) {
-            material.setName(dto.getName());
-        }
-        if (dto.getUnit() != null) {
-            material.setUnit(dto.getUnit());
-        }
+        material.setName(dto.getName());
+        material.setUnit(dto.getUnit());
         material.setDescription(dto.getDescription());
 
         materialRepository.save(material);

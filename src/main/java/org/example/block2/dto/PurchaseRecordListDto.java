@@ -5,7 +5,6 @@ import lombok.Getter;
 
 import java.math.BigDecimal;
 
-
 /**
  * DTO for the list response .
  */

@@ -5,8 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 /**
  * Repository for purchase records.
  */
@@ -14,6 +12,7 @@ import java.util.List;
 public interface PurchaseRecordRepository extends
         JpaRepository<PurchaseRecordData, Long>,
         JpaSpecificationExecutor<PurchaseRecordData> {
+
 }
 
 

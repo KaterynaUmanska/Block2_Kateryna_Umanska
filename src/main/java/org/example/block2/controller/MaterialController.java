@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.example.block2.dto.MaterialDto;
 import org.example.block2.dto.MaterialSaveDto;
@@ -59,7 +60,7 @@ public class MaterialController {
     })
     @GetMapping("/{id}")
     public MaterialDto getMaterial(
-            @Parameter(description = "Material ID", required = true) @PathVariable("id") Long id) {
+            @Parameter(description = "Material ID", required = true) @PathVariable("id") @Positive Long id) {
         return materialService.getMaterialById(id);
     }
 
@@ -104,7 +105,7 @@ public class MaterialController {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateMaterial(
-            @Parameter(description = "Material ID", required = true) @PathVariable("id") Long id,
+            @Parameter(description = "Material ID", required = true) @PathVariable("id") @Positive Long id,
             @Valid @RequestBody MaterialSaveDto dto) {
         materialService.updateMaterial(id, dto);
     }
@@ -125,7 +126,7 @@ public class MaterialController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteMaterial(
-            @Parameter(description = "Material ID", required = true) @PathVariable("id") Long id) {
+            @Parameter(description = "Material ID", required = true) @PathVariable("id") @Positive Long id) {
         materialService.deleteMaterial(id);
     }
 }

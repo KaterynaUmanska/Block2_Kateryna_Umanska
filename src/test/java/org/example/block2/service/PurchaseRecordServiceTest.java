@@ -219,7 +219,7 @@ public class PurchaseRecordServiceTest {
         testDataFactory.createPurchaseRecordDto(100L, cable.getId(), 20.0);
         testDataFactory.createPurchaseRecordDto(200L, cable.getId(), 30.0);
 
-        PurchaseRecordFilterDto filter = new PurchaseRecordFilterDto();
+        PurchaseRecordListFilterDto filter = new PurchaseRecordListFilterDto();
         filter.setOrderId(100L);
         filter.setMaterialName("Cable");
         filter.setQuantityFrom(BigDecimal.valueOf(15.0));
@@ -249,7 +249,7 @@ public class PurchaseRecordServiceTest {
 
         testDataFactory.createPurchaseRecordDto(100L, material.getId(), 20.0);
 
-        PurchaseRecordReportFilterDto filter = new PurchaseRecordReportFilterDto();
+        PurchaseRecordFilterDto filter = new PurchaseRecordFilterDto();
         filter.setOrderId(100L);
         filter.setMaterialName(uniqueMaterialName);
         filter.setQuantityFrom(BigDecimal.valueOf(15.0));

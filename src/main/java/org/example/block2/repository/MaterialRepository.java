@@ -2,7 +2,6 @@ package org.example.block2.repository;
 
 import org.example.block2.data.MaterialData;
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.Optional;
 
 public interface MaterialRepository extends JpaRepository<MaterialData, Long> {

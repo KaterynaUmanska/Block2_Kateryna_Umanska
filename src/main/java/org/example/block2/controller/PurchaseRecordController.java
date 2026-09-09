@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.example.block2.dto.*;
 import org.example.block2.service.PurchaseRecordService;
@@ -59,7 +60,7 @@ public class PurchaseRecordController {
     })
     @GetMapping("/{id}")
     public PurchaseRecordDto getPurchaseRecord(
-            @Parameter(description = "Purchase record ID", required = true) @PathVariable("id") Long id) {
+            @Parameter(description = "Purchase record ID", required = true) @PathVariable("id") @Positive Long id) {
         return purchaseRecordService.getPurchaseRecordById(id);
     }
 
@@ -106,7 +107,7 @@ public class PurchaseRecordController {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updatePurchaseRecord(
-            @Parameter(description = "Purchase record ID", required = true) @PathVariable("id") Long id,
+            @Parameter(description = "Purchase record ID", required = true) @PathVariable("id") @Positive Long id,
             @Valid @RequestBody PurchaseRecordSaveDto dto) {
         purchaseRecordService.updatePurchaseRecord(id, dto);
     }
@@ -125,7 +126,7 @@ public class PurchaseRecordController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePurchaseRecord(
-            @Parameter(description = "Purchase record ID", required = true) @PathVariable("id") Long id) {
+            @Parameter(description = "Purchase record ID", required = true) @PathVariable("id") @Positive Long id) {
         purchaseRecordService.deletePurchaseRecord(id);
     }
 
@@ -147,7 +148,7 @@ public class PurchaseRecordController {
     })
     @PostMapping("/_list")
     public PurchaseRecordListResponse getPurchaseRecords(
-            @Valid @RequestBody PurchaseRecordFilterDto filter) {
+            @Valid @RequestBody PurchaseRecordListFilterDto filter) {
         return purchaseRecordService.getPurchaseRecords(filter);
     }
 
@@ -165,7 +166,7 @@ public class PurchaseRecordController {
     })
     @PostMapping("/_report")
     public ResponseEntity<byte[]> generateReport(
-            @Valid @RequestBody PurchaseRecordReportFilterDto filter) {
+            @Valid @RequestBody PurchaseRecordFilterDto filter) {
 
         byte[] report = purchaseRecordService.generateReport(filter);
 

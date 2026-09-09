@@ -13,7 +13,7 @@ public class PurchaseRecordSpecifications {
 
     public static Specification<PurchaseRecordData> hasMaterialName(String materialName) {
         return (root, query, cb) ->
-                materialName == null ? null : cb.equal(root.get("material").get("name"), materialName);
+                materialName == null ? null : cb.equal(cb.lower(root.get("material").get("name")), materialName.toLowerCase());
     }
 
     public static Specification<PurchaseRecordData> quantityGreaterThanOrEqualTo(BigDecimal quantityFrom) {
