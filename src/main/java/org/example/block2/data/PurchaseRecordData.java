@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 @Table(name = "purchase_records")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class PurchaseRecordData {
+
     /**
      * Purchase record ID.
      */

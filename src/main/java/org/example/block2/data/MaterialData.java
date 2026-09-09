@@ -18,6 +18,7 @@ import java.util.Set;
 @Table(name = "materials")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class MaterialData {
+
     /**
      * Material ID.
      */

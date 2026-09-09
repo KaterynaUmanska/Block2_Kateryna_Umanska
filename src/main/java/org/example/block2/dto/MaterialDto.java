@@ -14,6 +14,7 @@ import org.example.block2.dict.Unit;
 @Jacksonized
 @Schema(description = "Material details")
 public class MaterialDto {
+
     /**
      * Material ID.
      */

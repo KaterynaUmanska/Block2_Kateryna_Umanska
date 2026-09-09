@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 @Jacksonized
 @Schema(description = "Purchase record information")
 public class PurchaseRecordDto {
+
     /**
      * Purchase record ID.
      */

@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 public class PurchaseRecordFilterDto {
+
     /**
      * ID of the purchase order.
      */

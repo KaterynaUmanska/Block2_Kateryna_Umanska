@@ -14,6 +14,7 @@ import lombok.extern.jackson.Jacksonized;
 @Jacksonized
 @Schema(description = "Result of purchase record import operation")
 public class PurchaseRecordProcessingResult {
+
     @Schema(description = "Number of successfully imported records", example = "8")
     private int successful;
 
