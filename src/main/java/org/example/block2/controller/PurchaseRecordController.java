@@ -166,7 +166,7 @@ public class PurchaseRecordController {
     })
     @PostMapping("/_report")
     public ResponseEntity<byte[]> generateReport(
-            @Valid @RequestBody PurchaseRecordFilterDto filter) {
+            @RequestBody @Valid PurchaseRecordFilterDto filter) {
 
         byte[] report = purchaseRecordService.generateReport(filter);
 

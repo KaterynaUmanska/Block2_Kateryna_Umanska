@@ -18,5 +18,38 @@
     "orderId": 10041,
     "materialId": 1,
     "quantity": 10
+  },
+
+  {
+    "orderId": 10031,
+    "materialId": 1,
+    "quantity": 5
+  },
+  {
+    "orderId": 10041,
+    "materialId": 3,
+    "quantity": -10
+  },
+
+  {
+    "orderId": 10031,
+    "materialId": 3,
+    "quantity": 5
+  },
+  {
+    "orderId": 10071,
+    "materialId": 3,
+    "quantity": 10
+  },
+
+  {
+    "orderId": 10061,
+    "materialId": 1,
+    "quantity": 5
+  },
+  {
+    "orderId": 10051,
+    "materialId": 1,
+    "quantity": 10
   }
 ]

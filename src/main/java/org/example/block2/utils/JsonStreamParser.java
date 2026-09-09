@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.block2.dto.PurchaseRecordSaveDto;
+import org.example.block2.exception.InvalidFileFormatException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +37,7 @@ public class JsonStreamParser {
             JsonToken firstToken = parser.nextToken();
 
             if (firstToken != JsonToken.START_ARRAY) {
-                throw new IllegalStateException(
+                throw new InvalidFileFormatException(
                         "Очікувався JSON-масив"
                 );
             }
@@ -49,7 +50,7 @@ public class JsonStreamParser {
                 }
 
                 if (token != JsonToken.START_OBJECT) {
-                    throw new IllegalStateException(
+                    throw new InvalidFileFormatException(
                             "Очікувався JSON-об'єкт у масиві"
                     );
                 }
@@ -64,7 +65,7 @@ public class JsonStreamParser {
             }
 
             if (parser.nextToken() != null) {
-                throw new IllegalStateException(
+                throw new InvalidFileFormatException(
                         "Після завершення JSON-масиву знайдено додаткові дані"
                 );
             }

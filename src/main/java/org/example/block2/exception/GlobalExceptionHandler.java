@@ -106,11 +106,9 @@ public class GlobalExceptionHandler {
      * @param ex data integrity violation exception
      * @return problem details
      */
-    @ExceptionHandler({
-            DataIntegrityViolationException.class,
-            org.hibernate.exception.ConstraintViolationException.class
-    })
-    public ProblemDetail handleDataIntegrityViolation(Exception ex) {
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        log.warn("Data integrity violation: {}", ex.getMessage());
 
         ProblemDetail problemDetail =
                 ProblemDetail.forStatus(HttpStatus.CONFLICT);
@@ -120,6 +118,30 @@ public class GlobalExceptionHandler {
 
         return problemDetail;
     }
+
+    /**
+     * Handles invalid file format errors during import.
+     *
+     * @param ex invalid file format exception
+     * @return problem details
+     */
+    @ExceptionHandler(InvalidFileFormatException.class)
+    public ProblemDetail handleInvalidFileFormat(InvalidFileFormatException ex) {
+        log.warn("Invalid file format exception: {}", ex.getMessage());
+
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problemDetail.setTitle("Invalid File Format");
+        problemDetail.setDetail(ex.getMessage());
+
+        return problemDetail;
+    }
+
+    /**
+     * Handles illegal argument errors.
+     *
+     * @param ex illegal argument exception
+     * @return problem details
+     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handleIllegalArgumentException(IllegalArgumentException ex) {
         log.warn("Illegal argument exception: {}", ex.getMessage());

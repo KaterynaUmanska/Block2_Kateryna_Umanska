@@ -294,6 +294,25 @@ public class PurchaseRecordControllerTest {
     }
 
     @Test
+    void updatePurchaseRecord_withDuplicateOrderAndMaterial_shouldReturnConflict() throws Exception {
+
+        MaterialData material = testDataFactory.createMaterial();
+        testDataFactory.createPurchaseRecord(100L, material, 10.0);
+        PurchaseRecordData recordToUpdate = testDataFactory.createPurchaseRecord(200L, material, 15.0);
+
+        PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
+                .orderId(100L)
+                .materialId(material.getId())
+                .quantity(BigDecimal.valueOf(25.0))
+                .build();
+
+        mockMvc.perform(put("/api/purchases/{id}", recordToUpdate.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
     void deletePurchaseRecord_shouldReturnNoContent() throws Exception {
         MaterialData material = testDataFactory.createMaterial();
         PurchaseRecordData saved = testDataFactory.createPurchaseRecord(100L, material, 10.0);
@@ -452,10 +471,7 @@ public class PurchaseRecordControllerTest {
         testDataFactory.createPurchaseRecord(101L, material, 20.0);
 
         String request = """
-            {
-                "page": 1,
-                "size": 20
-            }
+            {}
             """;
 
         mockMvc.perform(post("/api/purchases/_report")
@@ -491,9 +507,7 @@ public class PurchaseRecordControllerTest {
 
         String request = """
             {
-                "orderId": 100,
-                "page": 1,
-                "size": 20
+                "orderId": 100
             }
             """;
 
@@ -660,5 +674,76 @@ public class PurchaseRecordControllerTest {
                 1,
                 purchaseRecordRepository.count()
         );
+    }
+
+    @Test
+    void getPurchaseRecords_withInvalidPage_shouldReturnBadRequest() throws Exception {
+        String request = """
+            {
+                "page": 0,
+                "size": 10
+            }
+            """;
+
+        mockMvc.perform(post("/api/purchases/_list")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getPurchaseRecords_withInvalidSize_shouldReturnBadRequest() throws Exception {
+        String request = """
+            {
+                "page": 1,
+                "size": 101
+            }
+            """;
+
+        mockMvc.perform(post("/api/purchases/_list")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getPurchaseRecords_withInvalidQuantityRange_shouldReturnBadRequest() throws Exception {
+        String request = """
+            {
+                "quantityFrom": 50.0,
+                "quantityTo": 10.0,
+                "page": 1,
+                "size": 10
+            }
+            """;
+
+        mockMvc.perform(post("/api/purchases/_list")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void upload_withInvalidFileFormat_shouldReturnBadRequest() throws Exception {
+        String json = """
+            {
+                "orderId": 100,
+                "materialId": 1,
+                "quantity": 10.5
+            }
+            """;
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "purchases.json",
+                MediaType.APPLICATION_JSON_VALUE,
+                json.getBytes(StandardCharsets.UTF_8)
+        );
+
+        mockMvc.perform(
+                        multipart("/api/purchases/upload")
+                                .file(file)
+                )
+                .andExpect(status().isBadRequest());
     }
 }

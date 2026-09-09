@@ -25,11 +25,15 @@ public class ServiceMonitor {
     @Around("@annotation(Monitored)")
     public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
-        Object result = joinPoint.proceed();
-        log.debug("Method '{}' with params={} executed in {} ms",
-                joinPoint.getSignature().toShortString(),
-                List.of(joinPoint.getArgs()),
-                System.currentTimeMillis() - start);
-        return result;
+
+        try {
+            return joinPoint.proceed();
+        } finally {
+            log.debug(
+                    "Method '{}' executed in {} ms",
+                    joinPoint.getSignature().toShortString(),
+                    System.currentTimeMillis() - start
+            );
+        }
     }
 }

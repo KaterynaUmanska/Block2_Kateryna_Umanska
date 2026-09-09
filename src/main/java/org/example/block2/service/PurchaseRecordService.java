@@ -23,7 +23,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.validation.Validator;
-
+import org.hibernate.exception.ConstraintViolationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -149,7 +149,7 @@ public class PurchaseRecordService {
             entityManager.flush();
 
             log.info("Successfully updated purchase record with ID: {}", id);
-        } catch (DataIntegrityViolationException ex) {
+        } catch (DataIntegrityViolationException | ConstraintViolationException ex) {
             throw new DuplicateResourceException(
                     "Purchase record for order ID '%d' and material ID '%d' already exists"
                             .formatted(dto.getOrderId(), dto.getMaterialId())
