@@ -41,13 +41,13 @@ Database schema створюється та контролюється за до
 
 ## REST API
 ### PurchaseRecord
-* POST /api/purchase-records - Створити запис про покупку
-* GET /api/purchase-records/{id} - Отримати запис про покупку за ID
-* PUT /api/purchase-records/{id} - Оновити запис про покупку
-* DELETE /api/purchase-records/{id} - Видалити запис про покупку
+* POST /api/purchase-records - Створити запис про закупівлю
+* GET /api/purchase-records/{id} - Отримати запис про закупівлю за ID
+* PUT /api/purchase-records/{id} - Оновити запис про закупівлю
+* DELETE /api/purchase-records/{id} - Видалити запис про закупівлю
 * POST /api/purchase-records/_list - Отримати відфільтрований список із пагінацією
 * POST /api/purchase-records/_report - Згенерувати звіт у форматі CSV
-* POST /api/purchase-records/upload - Імпортувати записи про покупки з JSON
+* POST /api/purchase-records/upload - Імпортувати записи про закупівлі з JSON
 
 ### Material
 * GET /api/materials - Отримати всі матеріали
@@ -57,7 +57,7 @@ Database schema створюється та контролюється за до
 * DELETE /api/materials/{id} - Видалити матеріал
 
 ## Фільтрація та пагінація
-Кінцева точка (ендпоінт) списку записів про покупки підтримує необов'язкові фільтри:
+Кінцева точка (ендпоінт) списку записів про закупівлі підтримує необов'язкові фільтри:
 * orderId (ID замовлення)
 * materialName (назва матеріалу)
 * quantityFrom (кількість від)
@@ -100,7 +100,7 @@ Content-Type: text/csv
 Content-Disposition: attachment; filename="purchase-records.csv"`
 
 ## Імпорт JSON
-Кінцева точка: `POST /api/purchase-records/upload` приймає JSON-файл, що містить записи про покупки.
+Кінцева точка: `POST /api/purchase-records/upload` приймає JSON-файл, що містить записи про звкупівлі.
 
 Кожен імпортований запис проходить такі етапи:
 * парситься з JSON;
