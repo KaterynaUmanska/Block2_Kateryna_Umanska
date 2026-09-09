@@ -12,7 +12,7 @@ erDiagram
 
     MATERIALS {
         BIGINT id PK
-        VARCHAR name UK
+        VARCHAR name
         VARCHAR unit
         TEXT description
     }
@@ -64,8 +64,13 @@ erDiagram
 ### Material name uniqueness
 
 Унікальність назви матеріалу
-Стовпець `materials.name` має обмеження унікальності.
-Це запобігає збереженню в базі даних кількох матеріалів з однаковою назвою.
+
+Назви матеріалів є унікальними без урахування регістру.
+У базі даних створено унікальний функціональний індекс:
+```
+CREATE UNIQUE INDEX uk_material_name_lower
+    ON materials (LOWER(name));
+```
 
 ### Purchase record uniqueness
 
@@ -95,12 +100,12 @@ uk_order_material
 
 Для бази даних створено такі індекси:
 
-| Index                              | Table            | Columns               | Purpose                                                               |
-| ---------------------------------- | ---------------- | --------------------- |-----------------------------------------------------------------------|
-| `idx_purchase_records_material_id` | purchase_records | material_id           | Ефективний пошук матеріалу та виконання з'єднань (joins)              |                  |
-| `idx_purchase_records_order_id`    | purchase_records | order_id              | Ефективна фільтрація за замовленням                         |
-| `uk_order_material`                | purchase_records | order_id, material_id | Забезпечує унікальність і підтримує пошук за замовленням та матеріалом |
-| unique index                       | materials        | name                  | Забезпечує унікальність назви матеріалу                                   |
+| Index                           | Table            | Columns               | Purpose                                                                |
+| ------------------------------- | ---------------- | --------------------- |--------------------purchase_records------------------------------------|
+| `idx_purchase_records_material` | purchase_records | material_id           | Ефективний пошук матеріалу та виконання з'єднань (joins)               |
+| `idx_purchase_records_order`    | purchase_records | order_id              | Ефективна фільтрація за замовленням                                    |
+| `uk_order_material`             | purchase_records | order_id, material_id | Забезпечує унікальність і підтримує пошук за замовленням та матеріалом |
+| `uk_material_name_lower`        | materials        | LOWER(name)           | Забезпечує унікальність назви матеріалу без урахування регістру        |
 
 
 

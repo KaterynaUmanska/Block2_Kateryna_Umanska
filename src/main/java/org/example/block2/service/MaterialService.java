@@ -5,6 +5,7 @@ import jakarta.persistence.PersistenceContext;
 import org.example.block2.dto.MaterialDto;
 import org.example.block2.exception.DuplicateResourceException;
 import org.example.block2.exception.ResourceNotFoundException;
+import org.example.block2.monitor.Monitored;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,7 @@ public class MaterialService {
      * @throws DuplicateResourceException if duplicate name or invalid data
      */
     @Transactional
+    @Monitored
     public MaterialDto saveMaterial(MaterialSaveDto dto) {
         log.info("Attempting to save new material with name: '{}'", dto.getName());
 
@@ -57,6 +59,7 @@ public class MaterialService {
      *
      * @return list of material DTOs
      */
+    @Monitored
     @Transactional(readOnly = true)
     public List<MaterialDto> getAllMaterials() {
         log.debug("Fetching all materials from database");
@@ -76,6 +79,7 @@ public class MaterialService {
      * @param id material ID
      * @return material DTO
      */
+    @Monitored
     @Transactional(readOnly = true)
     public MaterialDto getMaterialById(Long id) {
         log.debug("Fetching material by ID: {}", id);
@@ -97,6 +101,7 @@ public class MaterialService {
      * @param id  material ID
      * @param dto new material data
      */
+    @Monitored
     @Transactional
     public void updateMaterial(Long id, MaterialSaveDto dto) {
         log.info("Attempting to update material with ID: {}", id);
@@ -130,6 +135,7 @@ public class MaterialService {
      *
      * @param id material ID
      */
+    @Monitored
     @Transactional
     public void deleteMaterial(Long id) {
         log.info("Attempting to delete material with ID: {}", id);

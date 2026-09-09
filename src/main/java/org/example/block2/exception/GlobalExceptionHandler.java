@@ -101,7 +101,7 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
     /**
-     * Handles database constraint and data integrity violations (e.g., foreign key conflicts).
+     * Handles database constraint and data integrity violations
      *
      * @param ex data integrity violation exception
      * @return problem details
@@ -109,6 +109,25 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         log.warn("Data integrity violation: {}", ex.getMessage());
+
+        ProblemDetail problemDetail =
+                ProblemDetail.forStatus(HttpStatus.CONFLICT);
+
+        problemDetail.setTitle("Conflict violation");
+        problemDetail.setDetail("Resource cannot be modified or deleted because it is referenced by other records.");
+
+        return problemDetail;
+    }
+
+    /**
+     * Handles Hibernate constraint violations
+     *
+     * @param ex hibernate constraint violation exception
+     * @return problem details
+     */
+    @ExceptionHandler(org.hibernate.exception.ConstraintViolationException.class)
+    public ProblemDetail handleHibernateConstraintViolation(org.hibernate.exception.ConstraintViolationException ex) {
+        log.warn("Hibernate constraint violation: {}", ex.getMessage());
 
         ProblemDetail problemDetail =
                 ProblemDetail.forStatus(HttpStatus.CONFLICT);

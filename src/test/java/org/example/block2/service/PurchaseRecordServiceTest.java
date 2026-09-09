@@ -2,6 +2,7 @@ package org.example.block2.service;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import org.example.block2.data.MaterialData;
 import org.example.block2.data.PurchaseRecordData;
 import org.example.block2.dict.Unit;
 import org.example.block2.dto.*;
@@ -48,9 +49,15 @@ public class PurchaseRecordServiceTest {
     @Transactional
     @Test
     void createPurchaseRecord() {
-        MaterialDto material = testDataFactory.createMaterialDto("Test name", Unit.KG);
+        MaterialData material = testDataFactory.createMaterial("Test name");
 
-        PurchaseRecordDto result = testDataFactory.createPurchaseRecordDto(100L, material.getId(), 50.0);
+        PurchaseRecordDto result = purchaseRecordService.savePurchaseRecord(
+                PurchaseRecordSaveDto.builder()
+                        .orderId(100L)
+                        .materialId(material.getId())
+                        .quantity(BigDecimal.valueOf(50.0))
+                        .build()
+        );
 
         assertThat(result).isNotNull();
         assertThat(result.getId()).isNotNull();
@@ -73,8 +80,8 @@ public class PurchaseRecordServiceTest {
     @Test
     @Transactional
     void getPurchaseRecordById() {
-        MaterialDto material = testDataFactory.createMaterialDto("Test name", Unit.KG);
-        PurchaseRecordDto created = testDataFactory.createPurchaseRecordDto(100L, material.getId(), 50.0);
+        MaterialData material = testDataFactory.createMaterial("Test name");
+        PurchaseRecordData created = testDataFactory.createPurchaseRecord(100L, material, 50.0);
 
         PurchaseRecordDto result =
                 purchaseRecordService.getPurchaseRecordById(created.getId());
@@ -101,10 +108,13 @@ public class PurchaseRecordServiceTest {
     @Test
     @Transactional
     void updatePurchaseRecord() {
-        MaterialDto material1 = testDataFactory.createMaterialDto("Steel", Unit.KG);
-        MaterialDto material2 = testDataFactory.createMaterialDto("Cable", Unit.METERS);
+        MaterialData material1 = testDataFactory.createMaterial("Steel");
 
-        PurchaseRecordDto created = testDataFactory.createPurchaseRecordDto(100L, material1.getId(), 10.0);
+        MaterialData material2 = testDataFactory.createMaterial("Cable");
+        material2.setUnit(Unit.METERS);
+        material2 = materialRepository.save(material2);
+
+        PurchaseRecordData created = testDataFactory.createPurchaseRecord(100L, material1, 10.0);
 
         purchaseRecordService.updatePurchaseRecord(
                 created.getId(),
@@ -131,7 +141,7 @@ public class PurchaseRecordServiceTest {
 
     @Test
     void updatePurchaseRecord_notFound() {
-        MaterialDto material = testDataFactory.createMaterialDto("Test name", Unit.KG);
+        MaterialData material = testDataFactory.createMaterial("Test name");
 
         org.assertj.core.api.Assertions.assertThatThrownBy(
                         () -> purchaseRecordService.updatePurchaseRecord(
@@ -150,8 +160,8 @@ public class PurchaseRecordServiceTest {
     @Test
     @Transactional
     void deletePurchaseRecord() {
-        MaterialDto material = testDataFactory.createMaterialDto("Test name", Unit.KG);
-        PurchaseRecordDto created = testDataFactory.createPurchaseRecordDto(100L, material.getId(), 50.0);
+        MaterialData material = testDataFactory.createMaterial("Test name");
+        PurchaseRecordData created = testDataFactory.createPurchaseRecord(100L, material, 50.0);
 
         Long id = created.getId();
 
@@ -192,7 +202,7 @@ public class PurchaseRecordServiceTest {
 
     @Test
     void createPurchaseRecord_duplicate() {
-        MaterialDto material = testDataFactory.createMaterialDto("Test name", Unit.KG);
+        MaterialData material = testDataFactory.createMaterial("Test name");
 
         PurchaseRecordSaveDto dto = PurchaseRecordSaveDto.builder()
                 .orderId(100L)
@@ -212,12 +222,12 @@ public class PurchaseRecordServiceTest {
     @Test
     @Transactional
     void getPurchaseRecords_withFiltersAndPagination() {
-        MaterialDto steel = testDataFactory.createMaterialDto("Steel", Unit.KG);
-        MaterialDto cable = testDataFactory.createMaterialDto("Cable", Unit.METERS);
+        MaterialData steel = testDataFactory.createMaterial("Steel");
+        MaterialData cable = testDataFactory.createMaterial("Cable");
 
-        testDataFactory.createPurchaseRecordDto(100L, steel.getId(), 10.0);
-        testDataFactory.createPurchaseRecordDto(100L, cable.getId(), 20.0);
-        testDataFactory.createPurchaseRecordDto(200L, cable.getId(), 30.0);
+        testDataFactory.createPurchaseRecord(100L, steel, 10.0);
+        testDataFactory.createPurchaseRecord(100L, cable, 20.0);
+        testDataFactory.createPurchaseRecord(200L, cable, 30.0);
 
         PurchaseRecordListFilterDto filter = new PurchaseRecordListFilterDto();
         filter.setOrderId(100L);
@@ -245,9 +255,9 @@ public class PurchaseRecordServiceTest {
     @Transactional
     void generateReport() {
         String uniqueMaterialName = "Test name " + java.util.UUID.randomUUID();
-        MaterialDto material = testDataFactory.createMaterialDto(uniqueMaterialName, Unit.KG);
+        MaterialData material = testDataFactory.createMaterial(uniqueMaterialName);
 
-        testDataFactory.createPurchaseRecordDto(100L, material.getId(), 20.0);
+        testDataFactory.createPurchaseRecord(100L, material, 20.0);
 
         PurchaseRecordFilterDto filter = new PurchaseRecordFilterDto();
         filter.setOrderId(100L);
@@ -269,7 +279,7 @@ public class PurchaseRecordServiceTest {
 
     @Test
     void importPurchaseRecords() throws Exception {
-        MaterialDto material = testDataFactory.createMaterialDto("Test name", Unit.KG);
+        MaterialData material = testDataFactory.createMaterial("Test name");
 
         String json = """
             [

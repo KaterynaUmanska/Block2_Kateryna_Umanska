@@ -19,6 +19,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,6 +56,7 @@ public class PurchaseRecordService {
      * @return created purchase record DTO
      * @throws DuplicateResourceException if duplicate or invalid data
      */
+    @Monitored
     @Transactional
     public PurchaseRecordDto savePurchaseRecord(PurchaseRecordSaveDto dto) {
         log.info(
@@ -86,6 +88,7 @@ public class PurchaseRecordService {
      *
      * @return list of purchase record DTOs
      */
+    @Monitored
     @Transactional(readOnly = true)
     public List<PurchaseRecordDto> getAllPurchaseRecords() {
         log.debug("Fetching all purchase records from database");
@@ -105,6 +108,7 @@ public class PurchaseRecordService {
      * @param id purchase record ID
      * @return purchase record DTO
      */
+    @Monitored
     @Transactional(readOnly = true)
     public PurchaseRecordDto getPurchaseRecordById(Long id) {
         log.debug("Fetching purchase record by ID: {}", id);
@@ -126,6 +130,7 @@ public class PurchaseRecordService {
      * @param id  purchase record ID
      * @param dto new purchase record data
      */
+    @Monitored
     @Transactional
     public void updatePurchaseRecord(Long id, PurchaseRecordSaveDto dto) {
         log.info("Attempting to update purchase record with ID: {}", id);
@@ -162,6 +167,7 @@ public class PurchaseRecordService {
      *
      * @param id purchase record ID
      */
+    @Monitored
     @Transactional
     public void deletePurchaseRecord(Long id) {
         log.info("Attempting to delete purchase record with ID: {}", id);
@@ -215,7 +221,8 @@ public class PurchaseRecordService {
 
         Pageable pageable = PageRequest.of(
                 filter.getPage() - 1,
-                filter.getSize()
+                filter.getSize(),
+                Sort.by("id").ascending()
         );
 
         Page<PurchaseRecordData> result =
@@ -370,6 +377,7 @@ public class PurchaseRecordService {
     }
 
     @Transactional
+    @Monitored
     public PurchaseRecordProcessingResult importPurchaseRecords(
             InputStream inputStream
     ) throws IOException {

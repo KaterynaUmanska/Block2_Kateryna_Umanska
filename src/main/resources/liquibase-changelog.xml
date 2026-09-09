@@ -5,19 +5,23 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <changeSet id="1-create-material-table" author="UmKa">
+    <changeSet id="1-create-material-title-case-insensitive" author="UmKa">
         <createTable tableName="materials">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(255)">
-                <constraints nullable="false" unique="true"/>
+                <constraints nullable="false"/>
             </column>
             <column name="unit" type="VARCHAR(50)">
                 <constraints nullable="false"/>
             </column>
             <column name="description" type="TEXT"/>
         </createTable>
+
+        <createIndex indexName="uk_material_name_lower" tableName="materials" unique="true">
+            <column computed="true" name="lower(name)"/>
+        </createIndex>
     </changeSet>
 
     <changeSet id="2-create-purchase-record-table" author="UmKa">
