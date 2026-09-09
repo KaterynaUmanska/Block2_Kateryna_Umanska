@@ -1,8 +1,8 @@
 # Database Schema
 
-This document describes the database schema of the **Block2** application.
+Цей документ описує схему бази даних додатка Block2.
 
-The database is implemented in **PostgreSQL** and the schema is managed by **Liquibase**.
+База даних реалізована на базі PostgreSQL, а управління схемою здійснюється за допомогою Liquibase.
 
 ## Entity Relationship Diagram
 
@@ -29,58 +29,57 @@ erDiagram
 
 ### materials
 
-Stores information about materials that can be used in purchase records.
+Зберігає інформацію про матеріали, які можуть використовуватися в записах про закупівлі.
 
-| Column      | Type         | Constraints                 | Description                                          |
-| ----------- | ------------ | --------------------------- | ---------------------------------------------------- |
-| id          | BIGINT       | PRIMARY KEY, AUTO INCREMENT | Unique material identifier                           |
-| name        | VARCHAR(255) | NOT NULL, UNIQUE            | Unique material name                                 |
-| unit        | VARCHAR(50)  | NOT NULL                    | Unit of measurement: `KG`, `LITERS`, `METERS`, `PCS` |
-| description | TEXT         | NULL                        | Material description                                 |
+| Column      | Type         | Constraints                 | Description                                     |
+| ----------- | ------------ | --------------------------- |-------------------------------------------------|
+| id          | BIGINT       | PRIMARY KEY, AUTO INCREMENT | Унікальний ідентифікатор матеріалу              |
+| name        | VARCHAR(255) | NOT NULL, UNIQUE            | Унікальна назва матеріалу                       |
+| unit        | VARCHAR(50)  | NOT NULL                    | Одиниця виміру: `KG`, `LITERS`, `METERS`, `PCS` |
+| description | TEXT         | NULL                        | Опис матеріалу                                  |
 
 ### purchase_records
 
-Stores individual purchase positions belonging to production orders.
+Зберігає окремі позиції закупівель, що належать до замовлень.
 
-| Column      | Type          | Constraints                 | Description                       |
-| ----------- | ------------- | --------------------------- | --------------------------------- |
-| id          | BIGINT        | PRIMARY KEY, AUTO INCREMENT | Unique purchase record identifier |
-| order_id    | BIGINT        | NOT NULL                    | Production order identifier       |
-| quantity    | DECIMAL(19,3) | NOT NULL                    | Required material quantity        |
-| material_id | BIGINT        | NOT NULL, FOREIGN KEY       | Reference to `materials.id`       |
+| Column      | Type          | Constraints                 | Description                               |
+| ----------- | ------------- | --------------------------- |-------------------------------------------|
+| id          | BIGINT        | PRIMARY KEY, AUTO INCREMENT | Унікальний ідентифікатор запису закупівлі |
+| order_id    | BIGINT        | NOT NULL                    | Ідентифікатор замовлення                  |
+| quantity    | DECIMAL(19,3) | NOT NULL                    | Необхідна кількість матеріалу             |
+| material_id | BIGINT        | NOT NULL, FOREIGN KEY       | Посилання на `materials.id`               |
 
 ## Relationships
 
 ### MATERIALS to PURCHASE_RECORDS
 
-**One-to-Many relationship**
-
-* One `Material` can be referenced by zero or many `PurchaseRecord` records.
-* Each `PurchaseRecord` references exactly one `Material`.
-* The relationship is implemented through the `material_id` foreign key.
-* The foreign key references `materials.id`.
+Зв'язок "Один-до-багатьох" (One-to-Many)
+* На один Material може посилатися нуль або кілька записів PurchaseRecord.
+* Кожен PurchaseRecord посилається рівно на один Material.
+* Зв'язок реалізовано через зовнішній ключ material_id.
+* Зовнішній ключ посилається на materials.id.
 
 ## Constraints
 
 ### Material name uniqueness
 
-The `materials.name` column has a unique constraint.
-
-This prevents multiple materials with the same name from being stored in the database.
+Унікальність назви матеріалу
+Стовпець `materials.name` має обмеження унікальності.
+Це запобігає збереженню в базі даних кількох матеріалів з однаковою назвою.
 
 ### Purchase record uniqueness
 
-The combination of:
+Комбінація:
 
 ```text
 order_id + material_id
 ```
 
-is unique.
+є унікальною.
 
-This means that the same material cannot occur more than once within the same production order.
+Це означає, що той самий матеріал не може зустрічатися більше одного разу в межах одного замовлення.
 
-The constraint is named:
+Це обмеження має назву:
 
 ```text
 uk_order_material
@@ -88,35 +87,34 @@ uk_order_material
 
 ### Foreign key
 
-`purchase_records.material_id` references `materials.id`.
-
-A purchase record cannot reference a material that does not exist.
-
-Deleting a material that is referenced by purchase records is not allowed.
+`purchase_records.material_id` посилається на `materials.id`.
+Запис про закупівлю не може посилатися на матеріал, якого не існує.
+Видалення матеріалу, на який посилаються записи про закупівлю, заборонено.
 
 ## Indexes
 
-The following indexes are created for the database:
+Для бази даних створено такі індекси:
 
-| Index                              | Table            | Columns               | Purpose                                                       |
-| ---------------------------------- | ---------------- | --------------------- | ------------------------------------------------------------- |
-| `idx_purchase_records_material_id` | purchase_records | material_id           | Efficient material lookup and joins                           |
-| `idx_purchase_records_order_id`    | purchase_records | order_id              | Efficient filtering by production order                       |
-| `uk_order_material`                | purchase_records | order_id, material_id | Enforces uniqueness and supports lookup by order and material |
-| unique index                       | materials        | name                  | Enforces material name uniqueness                             |
+| Index                              | Table            | Columns               | Purpose                                                               |
+| ---------------------------------- | ---------------- | --------------------- |-----------------------------------------------------------------------|
+| `idx_purchase_records_material_id` | purchase_records | material_id           | Ефективний пошук матеріалу та виконання з'єднань (joins)              |                  |
+| `idx_purchase_records_order_id`    | purchase_records | order_id              | Ефективна фільтрація за замовленням                         |
+| `uk_order_material`                | purchase_records | order_id, material_id | Забезпечує унікальність і підтримує пошук за замовленням та матеріалом |
+| unique index                       | materials        | name                  | Забезпечує унікальність назви матеріалу                                   |
 
-No separate index is created for `quantity`.
 
-The `quantity` field is used for optional range filtering. An additional index is not required for the current application workload and dataset size. Indexing decisions should be based on query selectivity and actual database workload rather than on the data type alone.
+
+Окремий індекс для стовпця quantity не створюється.
+Поле quantity використовується для необов'язкової фільтрації за діапазоном. Додатковий індекс не потрібен для поточного навантаження на додаток і обсягу даних. Рішення про індексування повинні базуватися на вибірковості запитів та реальному навантаженні на базу даних, а не лише на типі даних.
 
 ## Database-related Application Flow
 
-1. A `Material` is created and stored in the `materials` table.
-2. A `PurchaseRecord` is created with an `orderId`, `materialId` and `quantity`.
-3. The application verifies that the referenced material exists.
-4. The purchase record is stored in `purchase_records`.
-5. During list requests, optional filters are applied at the database query level.
-6. Pagination is also performed at the database level.
-7. Reports use the same filtering logic and contain all matching purchase records.
-8. JSON import validates individual records and persists valid records.
+* Створюється Material і зберігається в таблиці materials.
+* Створюється PurchaseRecord з параметрами orderId, materialId та quantity.
+* Додаток перевіряє, чи існує матеріал, на який посилається запис.
+* Запис про закупівлю зберігається в таблицю purchase_records.
+* Під час запитів списку необов'язкові фільтри застосовуються на рівні запитів до бази даних.
+* Пагінація також виконується на рівні бази даних.
+* Звіти використовують ту саму логіку фільтрації та містять усі відповідні записи про закупівлі.
+* Імпорт JSON валідує окремі записи та зберігає валідні дані.
 
