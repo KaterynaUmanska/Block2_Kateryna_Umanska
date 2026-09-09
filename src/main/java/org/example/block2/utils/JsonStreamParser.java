@@ -38,7 +38,7 @@ public class JsonStreamParser {
 
             if (firstToken != JsonToken.START_ARRAY) {
                 throw new InvalidFileFormatException(
-                        "Очікувався JSON-масив"
+                        "Expected JSON array"
                 );
             }
 
@@ -51,7 +51,7 @@ public class JsonStreamParser {
 
                 if (token != JsonToken.START_OBJECT) {
                     throw new InvalidFileFormatException(
-                            "Очікувався JSON-об'єкт у масиві"
+                            "Expected JSON object in array"
                     );
                 }
 
@@ -66,7 +66,7 @@ public class JsonStreamParser {
 
             if (parser.nextToken() != null) {
                 throw new InvalidFileFormatException(
-                        "Після завершення JSON-масиву знайдено додаткові дані"
+                        "Additional data found after JSON array completion"
                 );
             }
         }
