@@ -6,6 +6,7 @@ import org.example.block2.dict.Unit;
 import org.example.block2.dto.PurchaseRecordSaveDto;
 import org.example.block2.repository.MaterialRepository;
 import org.example.block2.repository.PurchaseRecordRepository;
+import org.example.block2.utils.TestDataFactory;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -48,40 +49,18 @@ public class PurchaseRecordControllerTest {
     @Autowired
     private MaterialRepository materialRepository;
 
+    @Autowired
+    private TestDataFactory testDataFactory;
+
     @AfterEach
     void tearDown() {
         purchaseRecordRepository.deleteAll();
         materialRepository.deleteAll();
     }
 
-    private MaterialData createMaterial() {
-        return createMaterial("Test steel");
-    }
-
-    private MaterialData createMaterial(String name) {
-        MaterialData material = new MaterialData();
-        material.setName(name);
-        material.setDescription("Test material");
-        material.setUnit(Unit.KG);
-
-        return materialRepository.save(material);
-    }
-    private PurchaseRecordData createPurchaseRecord(
-            Long orderId,
-            MaterialData material,
-            Double quantity
-    ) {
-        PurchaseRecordData record = new PurchaseRecordData();
-        record.setOrderId(orderId);
-        record.setMaterial(material);
-        record.setQuantity(BigDecimal.valueOf(quantity));
-
-        return purchaseRecordRepository.save(record);
-    }
-
     @Test
     void createPurchaseRecord_shouldReturnCreatedId() throws Exception {
-        MaterialData material = createMaterial();
+        MaterialData material = testDataFactory.createMaterial();
 
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .orderId(100L)
@@ -98,7 +77,7 @@ public class PurchaseRecordControllerTest {
 
     @Test
     void createPurchaseRecord_withMinimalData_shouldReturnCreatedId() throws Exception {
-        MaterialData material = createMaterial();
+        MaterialData material = testDataFactory.createMaterial();
 
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .orderId(200L)
@@ -115,7 +94,7 @@ public class PurchaseRecordControllerTest {
 
     @Test
     void createPurchaseRecord_withoutOrderId_shouldReturnBadRequest() throws Exception {
-        MaterialData material = createMaterial();
+        MaterialData material = testDataFactory.createMaterial();
 
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .materialId(material.getId())
@@ -143,7 +122,7 @@ public class PurchaseRecordControllerTest {
 
     @Test
     void createPurchaseRecord_withoutQuantity_shouldReturnBadRequest() throws Exception {
-        MaterialData material = createMaterial();
+        MaterialData material = testDataFactory.createMaterial();
 
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .orderId(100L)
@@ -158,7 +137,7 @@ public class PurchaseRecordControllerTest {
 
     @Test
     void createPurchaseRecord_withInvalidQuantity_shouldReturnBadRequest() throws Exception {
-        MaterialData material = createMaterial();
+        MaterialData material = testDataFactory.createMaterial();
 
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .orderId(100L)
@@ -188,7 +167,7 @@ public class PurchaseRecordControllerTest {
 
     @Test
     void createPurchaseRecord_withDuplicateOrderAndMaterial_shouldReturnConflict() throws Exception {
-        MaterialData material = createMaterial();
+        MaterialData material = testDataFactory.createMaterial();
 
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .orderId(100L)
@@ -209,14 +188,8 @@ public class PurchaseRecordControllerTest {
 
     @Test
     void getPurchaseRecord_shouldReturnPurchaseRecord() throws Exception {
-        MaterialData material = createMaterial();
-
-        PurchaseRecordData purchaseRecord = new PurchaseRecordData();
-        purchaseRecord.setOrderId(100L);
-        purchaseRecord.setMaterial(material);
-        purchaseRecord.setQuantity(BigDecimal.valueOf(25.5));
-
-        PurchaseRecordData saved = purchaseRecordRepository.save(purchaseRecord);
+        MaterialData material = testDataFactory.createMaterial();
+        PurchaseRecordData saved = testDataFactory.createPurchaseRecord(100L, material, 25.5);
 
         mockMvc.perform(get("/api/purchases/{id}", saved.getId()))
                 .andExpect(status().isOk())
@@ -236,14 +209,8 @@ public class PurchaseRecordControllerTest {
 
     @Test
     void updatePurchaseRecord_shouldReturnNoContent() throws Exception {
-        MaterialData material = createMaterial();
-
-        PurchaseRecordData purchaseRecord = new PurchaseRecordData();
-        purchaseRecord.setOrderId(100L);
-        purchaseRecord.setMaterial(material);
-        purchaseRecord.setQuantity(BigDecimal.valueOf(10.0));
-
-        PurchaseRecordData saved = purchaseRecordRepository.save(purchaseRecord);
+        MaterialData material = testDataFactory.createMaterial();
+        PurchaseRecordData saved = testDataFactory.createPurchaseRecord(100L, material, 10.0);
 
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .orderId(200L)
@@ -267,21 +234,12 @@ public class PurchaseRecordControllerTest {
 
     @Test
     void updatePurchaseRecord_shouldChangeMaterial() throws Exception {
-        MaterialData firstMaterial = createMaterial();
-
-        MaterialData secondMaterial = new MaterialData();
-        secondMaterial.setName("Test cable");
-        secondMaterial.setDescription("Test cable material");
+        MaterialData firstMaterial = testDataFactory.createMaterial();
+        MaterialData secondMaterial = testDataFactory.createMaterial("Test cable");
         secondMaterial.setUnit(Unit.METERS);
-
         secondMaterial = materialRepository.save(secondMaterial);
 
-        PurchaseRecordData purchaseRecord = new PurchaseRecordData();
-        purchaseRecord.setOrderId(100L);
-        purchaseRecord.setMaterial(firstMaterial);
-        purchaseRecord.setQuantity(BigDecimal.valueOf(10.0));
-
-        PurchaseRecordData saved = purchaseRecordRepository.save(purchaseRecord);
+        PurchaseRecordData saved = testDataFactory.createPurchaseRecord(100L, firstMaterial, 10.0);
 
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .orderId(100L)
@@ -304,7 +262,7 @@ public class PurchaseRecordControllerTest {
 
     @Test
     void updatePurchaseRecord_whenNotFound_shouldReturnNotFound() throws Exception {
-        MaterialData material = createMaterial();
+        MaterialData material = testDataFactory.createMaterial();
 
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .orderId(100L)
@@ -320,14 +278,8 @@ public class PurchaseRecordControllerTest {
 
     @Test
     void updatePurchaseRecord_withInvalidQuantity_shouldReturnBadRequest() throws Exception {
-        MaterialData material = createMaterial();
-
-        PurchaseRecordData purchaseRecord = new PurchaseRecordData();
-        purchaseRecord.setOrderId(100L);
-        purchaseRecord.setMaterial(material);
-        purchaseRecord.setQuantity(BigDecimal.valueOf(10.0));
-
-        PurchaseRecordData saved = purchaseRecordRepository.save(purchaseRecord);
+        MaterialData material = testDataFactory.createMaterial();
+        PurchaseRecordData saved = testDataFactory.createPurchaseRecord(100L, material, 10.0);
 
         PurchaseRecordSaveDto request = PurchaseRecordSaveDto.builder()
                 .orderId(200L)
@@ -343,14 +295,8 @@ public class PurchaseRecordControllerTest {
 
     @Test
     void deletePurchaseRecord_shouldReturnNoContent() throws Exception {
-        MaterialData material = createMaterial();
-
-        PurchaseRecordData purchaseRecord = new PurchaseRecordData();
-        purchaseRecord.setOrderId(100L);
-        purchaseRecord.setMaterial(material);
-        purchaseRecord.setQuantity(BigDecimal.valueOf(10.0));
-
-        PurchaseRecordData saved = purchaseRecordRepository.save(purchaseRecord);
+        MaterialData material = testDataFactory.createMaterial();
+        PurchaseRecordData saved = testDataFactory.createPurchaseRecord(100L, material, 10.0);
 
         mockMvc.perform(delete("/api/purchases/{id}", saved.getId()))
                 .andExpect(status().isNoContent());
@@ -366,11 +312,11 @@ public class PurchaseRecordControllerTest {
 
     @Test
     void getPurchaseRecords_shouldReturnPaginatedRecords() throws Exception {
-        MaterialData steel = createMaterial();
+        MaterialData steel = testDataFactory.createMaterial();
 
-        createPurchaseRecord(100L, steel, 10.0);
-        createPurchaseRecord(101L, steel, 20.0);
-        createPurchaseRecord(102L, steel, 30.0);
+        testDataFactory.createPurchaseRecord(100L, steel, 10.0);
+        testDataFactory.createPurchaseRecord(101L, steel, 20.0);
+        testDataFactory.createPurchaseRecord(102L, steel, 30.0);
 
         String request = """
             {
@@ -387,14 +333,15 @@ public class PurchaseRecordControllerTest {
                 .andExpect(jsonPath("$.list.length()").value(2))
                 .andExpect(jsonPath("$.totalPages").value(2));
     }
+
     @Test
     void getPurchaseRecords_withOrderIdFilter_shouldReturnMatchingRecords() throws Exception {
-        MaterialData material = createMaterial();
-        MaterialData material2 = createMaterial("Wood");
+        MaterialData material = testDataFactory.createMaterial();
+        MaterialData material2 = testDataFactory.createMaterial("Wood");
 
-        createPurchaseRecord(100L, material, 10.0);
-        createPurchaseRecord(200L, material, 20.0);
-        createPurchaseRecord(100L, material2, 30.0);
+        testDataFactory.createPurchaseRecord(100L, material, 10.0);
+        testDataFactory.createPurchaseRecord(200L, material, 20.0);
+        testDataFactory.createPurchaseRecord(100L, material2, 30.0);
 
         String request = """
             {
@@ -412,19 +359,17 @@ public class PurchaseRecordControllerTest {
                 .andExpect(jsonPath("$.list[0].orderId").value(100))
                 .andExpect(jsonPath("$.list[1].orderId").value(100));
     }
+
     @Test
     void getPurchaseRecords_withMaterialNameFilter_shouldReturnMatchingRecords() throws Exception {
-        MaterialData steel = createMaterial();
-
-        MaterialData cable = new MaterialData();
-        cable.setName("Test cable");
-        cable.setDescription("Test cable");
+        MaterialData steel = testDataFactory.createMaterial();
+        MaterialData cable = testDataFactory.createMaterial("Test cable");
         cable.setUnit(Unit.METERS);
         cable = materialRepository.save(cable);
 
-        createPurchaseRecord(100L, steel, 10.0);
-        createPurchaseRecord(101L, cable, 20.0);
-        createPurchaseRecord(102L, cable, 30.0);
+        testDataFactory.createPurchaseRecord(100L, steel, 10.0);
+        testDataFactory.createPurchaseRecord(101L, cable, 20.0);
+        testDataFactory.createPurchaseRecord(102L, cable, 30.0);
 
         String request = """
             {
@@ -442,14 +387,15 @@ public class PurchaseRecordControllerTest {
                 .andExpect(jsonPath("$.list[0].materialName").value("Test cable"))
                 .andExpect(jsonPath("$.list[1].materialName").value("Test cable"));
     }
+
     @Test
     void getPurchaseRecords_withQuantityRange_shouldReturnMatchingRecords() throws Exception {
-        MaterialData material = createMaterial();
+        MaterialData material = testDataFactory.createMaterial();
 
-        createPurchaseRecord(100L, material, 5.0);
-        createPurchaseRecord(101L, material, 15.0);
-        createPurchaseRecord(102L, material, 25.0);
-        createPurchaseRecord(103L, material, 35.0);
+        testDataFactory.createPurchaseRecord(100L, material, 5.0);
+        testDataFactory.createPurchaseRecord(101L, material, 15.0);
+        testDataFactory.createPurchaseRecord(102L, material, 25.0);
+        testDataFactory.createPurchaseRecord(103L, material, 35.0);
 
         String request = """
             {
@@ -468,15 +414,16 @@ public class PurchaseRecordControllerTest {
                 .andExpect(jsonPath("$.list[0].quantity").value(15.0))
                 .andExpect(jsonPath("$.list[1].quantity").value(25.0));
     }
+
     @Test
     void getPurchaseRecords_withMultipleFilters_shouldReturnMatchingRecords() throws Exception {
-        MaterialData material = createMaterial();
-        MaterialData material2 = createMaterial("Wood");
+        MaterialData material = testDataFactory.createMaterial();
+        MaterialData material2 = testDataFactory.createMaterial("Wood");
 
-        createPurchaseRecord(100L, material, 10.0);
-        createPurchaseRecord(200L, material, 20.0);
-        createPurchaseRecord(300L, material, 50.0);
-        createPurchaseRecord(400L, material2, 20.0);
+        testDataFactory.createPurchaseRecord(100L, material, 10.0);
+        testDataFactory.createPurchaseRecord(200L, material, 20.0);
+        testDataFactory.createPurchaseRecord(300L, material, 50.0);
+        testDataFactory.createPurchaseRecord(400L, material2, 20.0);
 
         String request = """
             {
@@ -496,12 +443,13 @@ public class PurchaseRecordControllerTest {
                 .andExpect(jsonPath("$.list[0].orderId").value(200))
                 .andExpect(jsonPath("$.list[0].quantity").value(20.0));
     }
+
     @Test
     void generateReport_shouldReturnCsvFile() throws Exception {
-        MaterialData material = createMaterial();
+        MaterialData material = testDataFactory.createMaterial();
 
-        createPurchaseRecord(100L, material, 10.0);
-        createPurchaseRecord(101L, material, 20.0);
+        testDataFactory.createPurchaseRecord(100L, material, 10.0);
+        testDataFactory.createPurchaseRecord(101L, material, 20.0);
 
         String request = """
             {
@@ -516,7 +464,7 @@ public class PurchaseRecordControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string(
                         "Content-Type",
-                        org.hamcrest.Matchers.containsString("text/csv") // Проверяем, что тип содержит text/csv (игнорируя charset)
+                        org.hamcrest.Matchers.containsString("text/csv")
                 ))
                 .andExpect(header().string(
                         "Content-Disposition",
@@ -533,12 +481,13 @@ public class PurchaseRecordControllerTest {
                         org.hamcrest.Matchers.containsString("10,0")
                 ));
     }
+
     @Test
     void generateReport_withOrderIdFilter_shouldReturnOnlyMatchingRecords() throws Exception {
-        MaterialData material = createMaterial();
+        MaterialData material = testDataFactory.createMaterial();
 
-        createPurchaseRecord(100L, material, 10.0);
-        createPurchaseRecord(200L, material, 20.0);
+        testDataFactory.createPurchaseRecord(100L, material, 10.0);
+        testDataFactory.createPurchaseRecord(200L, material, 20.0);
 
         String request = """
             {
@@ -562,7 +511,7 @@ public class PurchaseRecordControllerTest {
 
     @Test
     void upload_shouldImportValidRecords() throws Exception {
-        MaterialData material = createMaterial();
+        MaterialData material = testDataFactory.createMaterial();
 
         String json = """
         [
@@ -602,22 +551,22 @@ public class PurchaseRecordControllerTest {
 
     @Test
     void upload_withInvalidRecord_shouldCountFailedRecords() throws Exception {
-        MaterialData material = createMaterial();
+        MaterialData material = testDataFactory.createMaterial();
 
         String json = """
-    [
-        {
-            "orderId": 100,
-            "materialId": %d,
-            "quantity": 10.5
-        },
-        {
-            "orderId": 101,
-            "materialId": %d,
-            "quantity": -5.0
-        }
-    ]
-    """.formatted(material.getId(), material.getId());
+        [
+            {
+                "orderId": 100,
+                "materialId": %d,
+                "quantity": 10.5
+            },
+            {
+                "orderId": 101,
+                "materialId": %d,
+                "quantity": -5.0
+            }
+        ]
+        """.formatted(material.getId(), material.getId());
 
         MockMultipartFile file = new MockMultipartFile(
                 "file",
@@ -675,7 +624,7 @@ public class PurchaseRecordControllerTest {
 
     @Test
     void upload_withDuplicateRecords_shouldPartiallyImport() throws Exception {
-        MaterialData material = createMaterial();
+        MaterialData material = testDataFactory.createMaterial();
 
         String json = """
         [

@@ -9,6 +9,7 @@ import org.example.block2.exception.DuplicateResourceException;
 import org.example.block2.exception.ResourceNotFoundException;
 import org.example.block2.repository.MaterialRepository;
 import org.example.block2.repository.PurchaseRecordRepository;
+import org.example.block2.utils.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @ActiveProfiles("test")
 public class PurchaseRecordServiceTest {
-    @Autowired
-    MaterialService materialService;
 
     @Autowired
     PurchaseRecordService purchaseRecordService;
@@ -37,36 +36,26 @@ public class PurchaseRecordServiceTest {
     @Autowired
     private MaterialRepository materialRepository;
 
+    @Autowired
+    private TestDataFactory testDataFactory;
+
     @AfterEach
     void tearDown() {
         purchaseRecordRepository.deleteAll();
         materialRepository.deleteAll();
     }
 
-    @Test
     @Transactional
+    @Test
     void createPurchaseRecord() {
+        MaterialDto material = testDataFactory.createMaterialDto("Test name", Unit.KG);
 
-        MaterialDto material = materialService.saveMaterial(
-                MaterialSaveDto.builder()
-                        .name("Test name")
-                        .description("Test material")
-                        .unit(Unit.KG)
-                        .build()
-        );
-
-        PurchaseRecordDto result = purchaseRecordService.savePurchaseRecord(
-                PurchaseRecordSaveDto.builder()
-                        .orderId(100L)
-                        .materialId(material.getId())
-                        .quantity(BigDecimal.valueOf(50.0))
-                        .build()
-        );
+        PurchaseRecordDto result = testDataFactory.createPurchaseRecordDto(100L, material.getId(), 50.0);
 
         assertThat(result).isNotNull();
         assertThat(result.getId()).isNotNull();
         assertThat(result.getOrderId()).isEqualTo(100L);
-        assertThat(result.getQuantity()).isEqualTo(50.0);
+        assertThat(result.getQuantity()).isEqualByComparingTo("50.0");
         assertThat(result.getMaterial()).isNotNull();
         assertThat(result.getMaterial().getId()).isEqualTo(material.getId());
         assertThat(result.getMaterial().getName()).isEqualTo("Test name");
@@ -76,7 +65,7 @@ public class PurchaseRecordServiceTest {
 
         assertThat(record).isNotNull();
         assertThat(record.getOrderId()).isEqualTo(100L);
-        assertThat(record.getQuantity()).isEqualTo(50.0);
+        assertThat(record.getQuantity()).isEqualByComparingTo("50.0");
         assertThat(record.getMaterial()).isNotNull();
         assertThat(record.getMaterial().getName()).isEqualTo("Test name");
     }
@@ -84,22 +73,8 @@ public class PurchaseRecordServiceTest {
     @Test
     @Transactional
     void getPurchaseRecordById() {
-
-        MaterialDto material = materialService.saveMaterial(
-                MaterialSaveDto.builder()
-                        .name("Test name")
-                        .description("Test material")
-                        .unit(Unit.KG)
-                        .build()
-        );
-
-        PurchaseRecordDto created = purchaseRecordService.savePurchaseRecord(
-                PurchaseRecordSaveDto.builder()
-                        .orderId(100L)
-                        .materialId(material.getId())
-                        .quantity(BigDecimal.valueOf(50.0))
-                        .build()
-        );
+        MaterialDto material = testDataFactory.createMaterialDto("Test name", Unit.KG);
+        PurchaseRecordDto created = testDataFactory.createPurchaseRecordDto(100L, material.getId(), 50.0);
 
         PurchaseRecordDto result =
                 purchaseRecordService.getPurchaseRecordById(created.getId());
@@ -107,7 +82,7 @@ public class PurchaseRecordServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(created.getId());
         assertThat(result.getOrderId()).isEqualTo(100L);
-        assertThat(result.getQuantity()).isEqualTo(50.0);
+        assertThat(result.getQuantity()).isEqualByComparingTo("50.0");
 
         assertThat(result.getMaterial()).isNotNull();
         assertThat(result.getMaterial().getId()).isEqualTo(material.getId());
@@ -116,7 +91,6 @@ public class PurchaseRecordServiceTest {
 
     @Test
     void getPurchaseRecordById_notFound() {
-
         org.assertj.core.api.Assertions.assertThatThrownBy(
                         () -> purchaseRecordService.getPurchaseRecordById(999999L)
                 )
@@ -127,30 +101,10 @@ public class PurchaseRecordServiceTest {
     @Test
     @Transactional
     void updatePurchaseRecord() {
+        MaterialDto material1 = testDataFactory.createMaterialDto("Steel", Unit.KG);
+        MaterialDto material2 = testDataFactory.createMaterialDto("Cable", Unit.METERS);
 
-        MaterialDto material1 = materialService.saveMaterial(
-                MaterialSaveDto.builder()
-                        .name("Steel")
-                        .description("Steel material")
-                        .unit(Unit.KG)
-                        .build()
-        );
-
-        MaterialDto material2 = materialService.saveMaterial(
-                MaterialSaveDto.builder()
-                        .name("Cable")
-                        .description("Copper cable")
-                        .unit(Unit.METERS)
-                        .build()
-        );
-
-        PurchaseRecordDto created = purchaseRecordService.savePurchaseRecord(
-                PurchaseRecordSaveDto.builder()
-                        .orderId(100L)
-                        .materialId(material1.getId())
-                        .quantity(BigDecimal.valueOf(10.0))
-                        .build()
-        );
+        PurchaseRecordDto created = testDataFactory.createPurchaseRecordDto(100L, material1.getId(), 10.0);
 
         purchaseRecordService.updatePurchaseRecord(
                 created.getId(),
@@ -169,7 +123,7 @@ public class PurchaseRecordServiceTest {
 
         assertThat(record).isNotNull();
         assertThat(record.getOrderId()).isEqualTo(200L);
-        assertThat(record.getQuantity()).isEqualTo(25.0);
+        assertThat(record.getQuantity()).isEqualByComparingTo("25.0");
         assertThat(record.getMaterial()).isNotNull();
         assertThat(record.getMaterial().getId()).isEqualTo(material2.getId());
         assertThat(record.getMaterial().getName()).isEqualTo("Cable");
@@ -177,14 +131,7 @@ public class PurchaseRecordServiceTest {
 
     @Test
     void updatePurchaseRecord_notFound() {
-
-        MaterialDto material = materialService.saveMaterial(
-                MaterialSaveDto.builder()
-                        .name("Test name")
-                        .description("Test material")
-                        .unit(Unit.KG)
-                        .build()
-        );
+        MaterialDto material = testDataFactory.createMaterialDto("Test name", Unit.KG);
 
         org.assertj.core.api.Assertions.assertThatThrownBy(
                         () -> purchaseRecordService.updatePurchaseRecord(
@@ -203,22 +150,8 @@ public class PurchaseRecordServiceTest {
     @Test
     @Transactional
     void deletePurchaseRecord() {
-
-        MaterialDto material = materialService.saveMaterial(
-                MaterialSaveDto.builder()
-                        .name("Test name")
-                        .description("Test material")
-                        .unit(Unit.KG)
-                        .build()
-        );
-
-        PurchaseRecordDto created = purchaseRecordService.savePurchaseRecord(
-                PurchaseRecordSaveDto.builder()
-                        .orderId(100L)
-                        .materialId(material.getId())
-                        .quantity(BigDecimal.valueOf(50.0))
-                        .build()
-        );
+        MaterialDto material = testDataFactory.createMaterialDto("Test name", Unit.KG);
+        PurchaseRecordDto created = testDataFactory.createPurchaseRecordDto(100L, material.getId(), 50.0);
 
         Long id = created.getId();
 
@@ -235,7 +168,6 @@ public class PurchaseRecordServiceTest {
 
     @Test
     void deletePurchaseRecord_notFound() {
-
         org.assertj.core.api.Assertions.assertThatThrownBy(
                         () -> purchaseRecordService.deletePurchaseRecord(999999L)
                 )
@@ -245,7 +177,6 @@ public class PurchaseRecordServiceTest {
 
     @Test
     void createPurchaseRecord_materialNotFound() {
-
         org.assertj.core.api.Assertions.assertThatThrownBy(
                         () -> purchaseRecordService.savePurchaseRecord(
                                 PurchaseRecordSaveDto.builder()
@@ -260,16 +191,8 @@ public class PurchaseRecordServiceTest {
     }
 
     @Test
-    @Transactional
     void createPurchaseRecord_duplicate() {
-
-        MaterialDto material = materialService.saveMaterial(
-                MaterialSaveDto.builder()
-                        .name("Test name")
-                        .description("Test material")
-                        .unit(Unit.KG)
-                        .build()
-        );
+        MaterialDto material = testDataFactory.createMaterialDto("Test name", Unit.KG);
 
         PurchaseRecordSaveDto dto = PurchaseRecordSaveDto.builder()
                 .orderId(100L)
@@ -289,49 +212,14 @@ public class PurchaseRecordServiceTest {
     @Test
     @Transactional
     void getPurchaseRecords_withFiltersAndPagination() {
+        MaterialDto steel = testDataFactory.createMaterialDto("Steel", Unit.KG);
+        MaterialDto cable = testDataFactory.createMaterialDto("Cable", Unit.METERS);
 
-        MaterialDto steel = materialService.saveMaterial(
-                MaterialSaveDto.builder()
-                        .name("Steel")
-                        .description("Steel")
-                        .unit(Unit.KG)
-                        .build()
-        );
-
-        MaterialDto cable = materialService.saveMaterial(
-                MaterialSaveDto.builder()
-                        .name("Cable")
-                        .description("Cable")
-                        .unit(Unit.METERS)
-                        .build()
-        );
-
-        purchaseRecordService.savePurchaseRecord(
-                PurchaseRecordSaveDto.builder()
-                        .orderId(100L)
-                        .materialId(steel.getId())
-                        .quantity(BigDecimal.valueOf(10.0))
-                        .build()
-        );
-
-        purchaseRecordService.savePurchaseRecord(
-                PurchaseRecordSaveDto.builder()
-                        .orderId(100L)
-                        .materialId(cable.getId())
-                        .quantity(BigDecimal.valueOf(20.0))
-                        .build()
-        );
-
-        purchaseRecordService.savePurchaseRecord(
-                PurchaseRecordSaveDto.builder()
-                        .orderId(200L)
-                        .materialId(cable.getId())
-                        .quantity(BigDecimal.valueOf(30.0))
-                        .build()
-        );
+        testDataFactory.createPurchaseRecordDto(100L, steel.getId(), 10.0);
+        testDataFactory.createPurchaseRecordDto(100L, cable.getId(), 20.0);
+        testDataFactory.createPurchaseRecordDto(200L, cable.getId(), 30.0);
 
         PurchaseRecordFilterDto filter = new PurchaseRecordFilterDto();
-
         filter.setOrderId(100L);
         filter.setMaterialName("Cable");
         filter.setQuantityFrom(BigDecimal.valueOf(15.0));
@@ -350,36 +238,22 @@ public class PurchaseRecordServiceTest {
 
         assertThat(record.getOrderId()).isEqualTo(100L);
         assertThat(record.getMaterialName()).isEqualTo("Cable");
-        assertThat(record.getQuantity()).isEqualTo(20.0);
+        assertThat(record.getQuantity()).isEqualByComparingTo("20.0");
     }
 
     @Test
     @Transactional
     void generateReport() {
         String uniqueMaterialName = "Test name " + java.util.UUID.randomUUID();
+        MaterialDto material = testDataFactory.createMaterialDto(uniqueMaterialName, Unit.KG);
 
-        MaterialDto material = materialService.saveMaterial(
-                MaterialSaveDto.builder()
-                        .name(uniqueMaterialName)
-                        .description("Test material")
-                        .unit(Unit.KG)
-                        .build()
-        );
-
-        purchaseRecordService.savePurchaseRecord(
-                PurchaseRecordSaveDto.builder()
-                        .orderId(100L)
-                        .materialId(material.getId())
-                        .quantity(BigDecimal.valueOf(20.0))
-                        .build()
-        );
+        testDataFactory.createPurchaseRecordDto(100L, material.getId(), 20.0);
 
         PurchaseRecordReportFilterDto filter = new PurchaseRecordReportFilterDto();
         filter.setOrderId(100L);
         filter.setMaterialName(uniqueMaterialName);
         filter.setQuantityFrom(BigDecimal.valueOf(15.0));
         filter.setQuantityTo(BigDecimal.valueOf(25.0));
-
 
         byte[] report = purchaseRecordService.generateReport(filter);
 
@@ -394,16 +268,8 @@ public class PurchaseRecordServiceTest {
     }
 
     @Test
-    @Transactional
     void importPurchaseRecords() throws Exception {
-
-        MaterialDto material = materialService.saveMaterial(
-                MaterialSaveDto.builder()
-                        .name("Test name")
-                        .description("Test material")
-                        .unit(Unit.KG)
-                        .build()
-        );
+        MaterialDto material = testDataFactory.createMaterialDto("Test name", Unit.KG);
 
         String json = """
             [
