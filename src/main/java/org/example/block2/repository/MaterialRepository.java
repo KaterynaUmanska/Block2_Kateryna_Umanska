@@ -4,6 +4,9 @@ import org.example.block2.data.MaterialData;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
+/**
+ * Repository for materials.
+ */
 public interface MaterialRepository extends JpaRepository<MaterialData, Long> {
     /**
      * Finds material by name.

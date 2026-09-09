@@ -9,9 +9,7 @@ import org.springframework.stereotype.Repository;
  * Repository for purchase records.
  */
 @Repository
-public interface PurchaseRecordRepository extends
-        JpaRepository<PurchaseRecordData, Long>,
-        JpaSpecificationExecutor<PurchaseRecordData> {
+public interface PurchaseRecordRepository extends JpaRepository<PurchaseRecordData, Long>, JpaSpecificationExecutor<PurchaseRecordData> {
 
 }
 

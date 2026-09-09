@@ -5,6 +5,10 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 
+/**
+ * Specifications for dynamic filtering of {@link PurchaseRecordData} entities.
+ */
+
 public class PurchaseRecordSpecifications {
     public static Specification<PurchaseRecordData> hasOrderId(Long orderId) {
         return (root, query, cb) ->
