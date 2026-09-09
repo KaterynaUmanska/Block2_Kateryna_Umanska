@@ -37,7 +37,7 @@ order_id + material_id
 
 Database schema створюється та контролюється за допомогою Liquibase.
 Детальна структура таблиць, зв'язків, constraints та indexes описана у:
-docs/database-schema.md
+[docs/database-schema.md](https://github.com/KaterynaUmanska/Block2_Kateryna_Umanska/blob/master/docs/database-schema.md)
 
 ## REST API
 ### PurchaseRecord
