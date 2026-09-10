@@ -46,10 +46,4 @@ public class MaterialData {
     @Column(nullable = false)
     private Unit unit;
 
-    /**
-     * Purchase records associated with this material.
-     */
-    @OneToMany(mappedBy = "material")
-    private Set<PurchaseRecordData> purchaseRecords;
-
 }
