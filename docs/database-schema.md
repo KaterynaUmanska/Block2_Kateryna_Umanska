@@ -31,12 +31,12 @@ erDiagram
 
 Зберігає інформацію про матеріали, які можуть використовуватися в записах про закупівлі.
 
-| Column      | Type         | Constraints                 | Description                                     |
-| ----------- | ------------ | --------------------------- |-------------------------------------------------|
-| id          | BIGINT       | PRIMARY KEY, AUTO INCREMENT | Унікальний ідентифікатор матеріалу              |
-| name        | VARCHAR(255) | NOT NULL, UNIQUE            | Унікальна назва матеріалу                       |
-| unit        | VARCHAR(50)  | NOT NULL                    | Одиниця виміру: `KG`, `LITERS`, `METERS`, `PCS` |
-| description | TEXT         | NULL                        | Опис матеріалу                                  |
+| Column      | Type         | Constraints                 | Description                                       |
+| ----------- | ------------ |-----------------------------|---------------------------------------------------|
+| id          | BIGINT       | PRIMARY KEY, AUTO INCREMENT | Унікальний ідентифікатор матеріалу                |
+| name        | VARCHAR(255) | NOT NULL                    | Унікальна назва матеріалу,без урахування регістру |
+| unit        | VARCHAR(50)  | NOT NULL                    | Одиниця виміру: `KG`, `LITERS`, `METERS`, `PCS`   |
+| description | TEXT         | NULL                        | Опис матеріалу                                    |
 
 ### purchase_records
 
@@ -51,9 +51,9 @@ erDiagram
 
 ## Relationships
 
-### MATERIALS to PURCHASE_RECORDS
+### PURCHASE_RECORDS to MATERIALS 
 
-Зв'язок "Один-до-багатьох" (One-to-Many)
+Зв'язок "Багато до одного" (Many-to-One)
 * На один Material може посилатися нуль або кілька записів PurchaseRecord.
 * Кожен PurchaseRecord посилається рівно на один Material.
 * Зв'язок реалізовано через зовнішній ключ material_id.
@@ -104,7 +104,7 @@ uk_order_material
 | ------------------------------- | ---------------- | --------------------- |--------------------purchase_records------------------------------------|
 | `idx_purchase_records_material` | purchase_records | material_id           | Ефективний пошук матеріалу та виконання з'єднань (joins)               |
 | `idx_purchase_records_order`    | purchase_records | order_id              | Ефективна фільтрація за замовленням                                    |
-| `uk_order_material`             | purchase_records | order_id, material_id | Забезпечує унікальність і підтримує пошук за замовленням та матеріалом |
+| `uk_order_material`             | purchase_records | order_id, material_id | Забезпечує унікальність комбінації order_id + material_id              |
 | `uk_material_name_lower`        | materials        | LOWER(name)           | Забезпечує унікальність назви матеріалу без урахування регістру        |
 
 

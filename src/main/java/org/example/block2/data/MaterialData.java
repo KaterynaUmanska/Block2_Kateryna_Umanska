@@ -31,7 +31,7 @@ public class MaterialData {
      * Material name.
      * Unique value.
      */
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
 
     /**

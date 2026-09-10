@@ -17,14 +17,14 @@ Material (матеріал) - другорядна сутність, яка мі
 
 Атрибути сутності:
 - id (Long) - унікальний ідентифікатор матеріалу, первинний ключ;
-- name (String) - назву матеріалу;
-- unit (Unit) - одиницю вимірювання. Можливі значення: KG, PCS, METERS, LITERS;.
-- description (String) - опис матеріала.
+- name (String) - назва матеріалу;
+- unit (Unit) - одиницю вимірювання. Можливі значення: KG, PCS, METERS, LITERS.
+- description (String) - опис матеріалу.
 
 Зв'язок між сутностями
 Основним зв'язком у проєкті є зв'язок Many-to-One між PurchaseRecord та Material.
 Кожен PurchaseRecord посилається рівно на один Material, а один Material може використовуватися у багатьох PurchaseRecord;
-Зв'язок реалізується через зовнішній ключ material_id у таблиці purchase_record.
+Зв'язок реалізується через зовнішній ключ material_id у таблиці purchase_records.
 
 Додатково для PurchaseRecord встановлено обмеження унікальності комбінації:
 order_id + material_id
@@ -90,17 +90,6 @@ JSON
 "totalPages": 1
 }
 ```
-## Звіт
-Кінцева точка звіту використовує ті самі критерії фільтрації, що й кінцева точка списку.
-Звіт містить усі записи, які відповідають вибраним фільтрам, і повертається у вигляді CSV-файлу для завантаження.
-Відповідь містить відповідний тип вмісту (content type) CSV та заголовок Content-Disposition.
-
-Приклад:
-```
-HTTP
-Content-Type: text/csv
-Content-Disposition: attachment; filename="purchase-records.csv"
-```
 
 ## Імпорт JSON
 Кінцева точка: `POST /api/purchase-records/upload` приймає JSON-файл, що містить записи про звкупівлі.
@@ -129,6 +118,17 @@ JSON
 Він узгоджений із початковими даними Liquibase та містить 10 записів, серед яких 8 валідних і 2 навмисно невалідні для перевірки ізольованої обробки помилок і отримання статистики успіху.
 
 ## Звіт
+Кінцева точка звіту використовує ті самі критерії фільтрації, що й кінцева точка списку.
+Звіт містить усі записи, які відповідають вибраним фільтрам, і повертається у вигляді CSV-файлу для завантаження.
+
+Приклад:
+```
+HTTP
+Content-Type: text/csv
+Content-Disposition: attachment; filename="purchase-records.csv"
+```
+
+## Робота з CSV-файлом
 Для коректного відображення української мови та кирилиці при відкритті згенерованого CSV-файлу в Microsoft Excel обов'язково використовуйте імпорт через меню Дані далі З тексту/CSV із вибором кодування UTF-8, оскільки файл містить BOM-маркер.
 
 ## База даних
@@ -194,35 +194,35 @@ Hibernate налаштований лише на перевірку схеми:
 * Springdoc OpenAPI - Swagger/OpenAPI documentation.
 * Spring AOP - monitoring аспектів.
 * Lombok - зменшення boilerplate-коду.
-* JUnit 5 / Spring Boot Test / MockMvc - тестування REST API.
+* JUnit 5 / Spring Boot Test / MockMvc / Mockito - тестування REST API.
 
 ## Структура проєкту
 ### Java (main)
 
 Основна структура застосунку:
 src/main/java
-* controller
-* data
-* dict
-* dto
-* exception
-* monitor
-* repository
-* service
-* utils
+* controller - REST-контролери, які обробляють HTTP-запити та формують HTTP-відповіді.
+* data - JPA-сутності, які відповідають таблицям бази даних.
+* dict - enum, які використовуються в предметній області.
+* dto - Data Transfer Objects для передачі даних між REST API та сервісним шаром.
+* exception - власні винятки та обробка помилок застосунку.
+* monitor - компоненти моніторингу для контролю виконання операцій.
+* repository - репозиторії для роботи з базою даних.
+* service - бізнес-логіка застосунку та робота з сутностями. 
+* utils - допоміжні утиліти, зокрема парсинг JSON.
 
 ### Java (test)
 
 Тести розташовані у:
 src/test/java
-* controller
-* service
-* utils
+* controller - інтеграційні тести REST API
+* service - тести сервісного шару.
+* utils - допоміжні утиліти, зокрема фабрика тестових даних (TestDataFactory)
 
 
 ## Тестування
 
-Проєкт містить інтеграційні тести REST API.
+Проєкт містить інтеграційні тести REST API та тести сервісного шару
 
 Для тестування використовуються:
 * JUnit 5;
@@ -249,7 +249,7 @@ src/test/java
 
 Після запуску:
 `mvn test`
-усі integration tests повинні завершуватися успішно.
+усі 70 тестів завершуються успішно.
 
 Для перевірки результату збірки використовується:
 `mvn clean test`
@@ -270,10 +270,10 @@ OpenAPI specification:
 Pagination виконується через Pageable, тому для _list не потрібно завантажувати всі записи в пам'ять.
 
 Для часто використовуваних полів у database schema створені індекси:
-* purchase_records.order_id;
-* purchase_records.material_id;
-* unique (order_id, material_id);
-* unique materials.name_lower.
+* purchase_records.order_id.
+* purchase_records.material_id.
+* unique (order_id, material_id).
+* uk_material_name_lower.
 
 Окремий індекс для quantity не створюється, оскільки поточний обсяг даних та характер запитів не вимагають його використання.
 JSON import використовує потоковий parsing та ізольовані транзакції для окремих записів, що дозволяє продовжувати обробку після помилки одного запису.
