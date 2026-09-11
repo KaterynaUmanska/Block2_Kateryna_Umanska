@@ -7,7 +7,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 /**
- * DTO for filtering purchase records.
+ * DTO for filtering and paginating purchase records.
  */
 @Getter
 @Setter

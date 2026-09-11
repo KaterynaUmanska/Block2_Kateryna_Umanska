@@ -7,7 +7,7 @@ import lombok.extern.jackson.Jacksonized;
 import org.example.block2.dict.Unit;
 
 /**
- * DTO for material details with associated purchase records.
+ * DTO for material details.
  */
 @Getter
 @Builder

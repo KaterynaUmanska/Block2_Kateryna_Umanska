@@ -302,6 +302,12 @@ public class PurchaseRecordService {
         return new PurchaseRecordListDto(data.getId(), data.getOrderId(), data.getMaterial().getName(), data.getQuantity());
     }
 
+    /**
+     * Generates CSV report for purchase records matching filters.
+     *
+     * @param filter filters for purchase records
+     * @return CSV report as byte array
+     */
     @Transactional(readOnly = true)
     @Monitored
     public byte[] generateReport(PurchaseRecordFilterDto filter) {
@@ -334,6 +340,13 @@ public class PurchaseRecordService {
         return report;
     }
 
+    /**
+     * Validates and safely imports a single purchase record.
+     *
+     * @param dto purchase record data to import
+     * @return true if the record was imported successfully, false otherwise
+     */
+
     private boolean importPurchaseRecord(PurchaseRecordSaveDto dto) {
 
         if (!validator.validate(dto).isEmpty()) {
@@ -358,6 +371,13 @@ public class PurchaseRecordService {
         }
     }
 
+    /**
+     * Imports purchase records from JSON input stream.
+     *
+     * @param inputStream JSON input stream containing purchase records
+     * @return processing result with successful and failed record counts
+     * @throws IOException if an I/O error occurs while reading the input stream
+     */
     @Transactional
     @Monitored
     public PurchaseRecordProcessingResult importPurchaseRecords(

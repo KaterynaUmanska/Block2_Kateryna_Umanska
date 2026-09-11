@@ -130,6 +130,7 @@ public class MaterialService {
         materialRepository.save(material);
         log.info("Successfully updated material with ID: {}", id);
     }
+
     /**
      * Deletes material by ID.
      *
@@ -150,6 +151,7 @@ public class MaterialService {
         entityManager.flush();
         log.info("Successfully deleted material with ID: {}", id);
     }
+
     /**
      * Converts entity to DTO.
      *
