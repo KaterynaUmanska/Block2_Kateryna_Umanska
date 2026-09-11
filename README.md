@@ -156,12 +156,12 @@ Hibernate налаштований лише на перевірку схеми:
 ### Збірка та тестування
 
 Для запуску всіх тестів:
-`./mvnw test`
+`./mvnw clean test`
 або:
-`mvn test`
+`mvn clean test`
 
 Для повної збірки:
-`./mvnw clean package`
+`./mvnw clean package` або `mvnw.cmd clean package`
 
 ## Запуск програми
 
