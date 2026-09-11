@@ -83,24 +83,6 @@ public class PurchaseRecordService {
         }
     }
 
-    /**
-     * Returns all purchase records as DTOs.
-     *
-     * @return list of purchase record DTOs
-     */
-    @Monitored
-    @Transactional(readOnly = true)
-    public List<PurchaseRecordDto> getAllPurchaseRecords() {
-        log.debug("Fetching all purchase records from database");
-
-        List<PurchaseRecordDto> records = purchaseRecordRepository.findAll().stream()
-                .map(PurchaseRecordService::convertToDto)
-                .toList();
-
-        log.info("Found {} purchase records in total", records.size());
-
-        return records;
-    }
 
     /**
      * Returns purchase record DTO by ID.

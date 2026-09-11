@@ -31,21 +31,6 @@ public class PurchaseRecordController {
     private final PurchaseRecordService purchaseRecordService;
 
     /**
-     * Retrieves a list of all purchase records.
-     *
-     * @return list of purchase records
-     */
-    @Operation(summary = "Get all purchase records", description = "Returns all purchase records with related material information")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Purchase records successfully retrieved",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = PurchaseRecordDto.class)))
-    })
-    @GetMapping
-    public List<PurchaseRecordDto> getAllPurchaseRecords() {
-        return purchaseRecordService.getAllPurchaseRecords();
-    }
-
-    /**
      * Retrieves purchase record details by ID.
      *
      * @param id purchase record ID

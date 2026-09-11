@@ -308,7 +308,10 @@ public class PurchaseRecordServiceTest {
         assertThat(result.getSuccessful()).isEqualTo(2);
         assertThat(result.getFailed()).isEqualTo(0);
 
-        assertThat(purchaseRecordService.getAllPurchaseRecords())
-                .hasSize(2);
+        PurchaseRecordListFilterDto filter = new PurchaseRecordListFilterDto();
+        PurchaseRecordListResponse response = purchaseRecordService.getPurchaseRecords(filter);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getList()).hasSize(2);
     }
 }

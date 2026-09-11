@@ -40,8 +40,8 @@ Database schema створюється та контролюється за до
 
 ## REST API
 ### PurchaseRecord
-* POST /api/purchase-records - Створити запис про закупівлю
 * GET /api/purchase-records/{id} - Отримати запис про закупівлю за ID
+* POST /api/purchase-records - Створити запис про закупівлю
 * PUT /api/purchase-records/{id} - Оновити запис про закупівлю
 * DELETE /api/purchase-records/{id} - Видалити запис про закупівлю
 * POST /api/purchase-records/_list - Отримати відфільтрований список із пагінацією
