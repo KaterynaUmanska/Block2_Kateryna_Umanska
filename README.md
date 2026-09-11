@@ -20,8 +20,9 @@ Material (матеріал) - другорядна сутність, яка мі
 - description (String) - опис матеріалу.
 
 Зв'язок між сутностями
+
 Основним зв'язком у проєкті є зв'язок Many-to-One між PurchaseRecord та Material.
-Кожен PurchaseRecord посилається рівно на один Material, а один Material може використовуватися у багатьох PurchaseRecord;
+Кожен PurchaseRecord посилається рівно на один Material, а один Material може використовуватися у багатьох PurchaseRecord. 
 Зв'язок реалізується через зовнішній ключ material_id у таблиці purchase_records.
 
 Додатково для PurchaseRecord встановлено обмеження унікальності комбінації:
