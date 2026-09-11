@@ -40,20 +40,20 @@ Database schema створюється та контролюється за до
 
 ## REST API
 ### PurchaseRecord
-* GET /api/purchase-records/{id} - Отримати запис про закупівлю за ID
-* POST /api/purchase-records - Створити запис про закупівлю
-* PUT /api/purchase-records/{id} - Оновити запис про закупівлю
-* DELETE /api/purchase-records/{id} - Видалити запис про закупівлю
-* POST /api/purchase-records/_list - Отримати відфільтрований список із пагінацією
-* POST /api/purchase-records/_report - Згенерувати звіт у форматі CSV
-* POST /api/purchase-records/upload - Імпортувати записи про закупівлі з JSON
+* GET /api/purchase-records/{id} - Отримання запису про закупівлю за ID
+* POST /api/purchase-records - Створення запису про закупівлю
+* PUT /api/purchase-records/{id} - Оновлення запису про закупівлю
+* DELETE /api/purchase-records/{id} - Видалення запису про закупівлю
+* POST /api/purchase-records/_list - Отримання відфільтрованого списку із пагінацією
+* POST /api/purchase-records/_report - Генерація звіту у форматі CSV
+* POST /api/purchase-records/upload - Імпорт записів про закупівлі з JSON
 
 ### Material
-* GET /api/materials - Отримати всі матеріали
-* GET /api/materials/{id} - Отримати матеріал за ID
-* POST /api/materials - Створити новий матеріал
-* PUT /api/materials/{id} - Оновити матеріал
-* DELETE /api/materials/{id} - Видалити матеріал
+* GET /api/materials - Отримання всіх матеріалів
+* GET /api/materials/{id} - Отримання матеріалу за ID
+* POST /api/materials - Створення нового матеріалу
+* PUT /api/materials/{id} - Оновлення матеріалу
+* DELETE /api/materials/{id} - Видалення матеріалу
 
 ## Фільтрація та пагінація
 Кінцева точка (ендпоінт) списку записів про закупівлі підтримує необов'язкові фільтри:
