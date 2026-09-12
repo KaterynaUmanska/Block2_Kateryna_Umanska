@@ -51,7 +51,7 @@ erDiagram
 
 ## Relationships
 
-### PURCHASE_RECORDS to MATERIALS 
+PURCHASE_RECORDS to MATERIALS 
 
 Зв'язок "Багато до одного" (Many-to-One)
 * На один Material може посилатися нуль або кілька записів PurchaseRecord.
