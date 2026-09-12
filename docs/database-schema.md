@@ -89,12 +89,12 @@ CREATE UNIQUE INDEX uk_material_name_lower
 
 Для бази даних створено такі індекси:
 
-| Index                           | Table            | Columns               | Purpose                                                                |
-| ------------------------------- | ---------------- | --------------------- |--------------------purchase_records------------------------------------|
-| `idx_purchase_records_material` | purchase_records | material_id           | Ефективний пошук матеріалу та виконання з'єднань (joins)               |
-| `idx_purchase_records_order`    | purchase_records | order_id              | Ефективна фільтрація за замовленням                                    |
-| `uk_order_material`             | purchase_records | order_id, material_id | Забезпечує унікальність комбінації order_id + material_id              |
-| `uk_material_name_lower`        | materials        | LOWER(name)           | Забезпечує унікальність назви матеріалу без урахування регістру        |
+| Index                           | Table            | Columns               | Purpose                                                           |
+| ------------------------------- | ---------------- | --------------------- |-------------------------------------------------------------------|
+| `idx_purchase_records_material` | purchase_records | material_id           | Ефективний пошук матеріалу та виконання з'єднань (joins)          |
+| `idx_purchase_records_order`    | purchase_records | order_id              | Ефективна фільтрація за замовленням                               |
+| `uk_order_material`             | purchase_records | order_id, material_id | Забезпечує унікальність комбінації order_id + material_id         |
+| `uk_material_name_lower`        | materials        | LOWER(name)           | Забезпечує унікальність назви матеріалу без урахування регістру   |
 
 
 
