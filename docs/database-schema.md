@@ -74,21 +74,11 @@ CREATE UNIQUE INDEX uk_material_name_lower
 
 ### Purchase record uniqueness
 
-Комбінація:
-
-```text
-order_id + material_id
-```
-
-є унікальною.
+Комбінація `order_id + material_id` є унікальною.
 
 Це означає, що той самий матеріал не може зустрічатися більше одного разу в межах одного замовлення.
 
-Це обмеження має назву:
-
-```text
-uk_order_material
-```
+Це обмеження має назву `uk_order_material`
 
 ### Foreign key
 
