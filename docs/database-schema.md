@@ -53,11 +53,10 @@ erDiagram
 
 PURCHASE_RECORDS to MATERIALS 
 
-Зв'язок "Багато до одного" (Many-to-One)
-* На один Material може посилатися нуль або кілька записів PurchaseRecord.
-* Кожен PurchaseRecord посилається рівно на один Material.
-* Зв'язок реалізовано через зовнішній ключ material_id.
-* Зовнішній ключ посилається на materials.id.
+Зв'язок "Багато до одного" (Many-to-One). 
+На один Material може посилатися нуль або кілька записів PurchaseRecord. 
+Кожен PurchaseRecord посилається рівно на один Material.
+Зв'язок реалізовано через зовнішній ключ material_id.
 
 ## Constraints
 
