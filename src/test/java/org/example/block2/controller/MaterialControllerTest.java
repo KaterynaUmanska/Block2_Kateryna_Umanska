@@ -7,7 +7,7 @@ import org.example.block2.dto.MaterialSaveDto;
 import org.example.block2.repository.MaterialRepository;
 import org.example.block2.repository.PurchaseRecordRepository;
 import org.example.block2.utils.TestDataFactory;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -44,7 +44,7 @@ public class MaterialControllerTest {
     @Autowired
     private TestDataFactory testDataFactory;
 
-    @AfterEach
+    @BeforeEach
     void tearDown() {
         purchaseRecordRepository.deleteAll();
         materialRepository.deleteAll();
@@ -214,7 +214,7 @@ public class MaterialControllerTest {
     @Test
     void updateMaterial_withDuplicateName_shouldReturnConflict() throws Exception {
         MaterialData material1 = testDataFactory.createMaterial("Steel");
-        MaterialData material2 = testDataFactory.createMaterial("Copper");
+        MaterialData material2 = testDataFactory.createMaterial("Steel2");
 
         MaterialSaveDto request = MaterialSaveDto.builder()
                 .name("Steel")

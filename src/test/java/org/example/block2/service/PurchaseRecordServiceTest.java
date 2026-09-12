@@ -11,7 +11,7 @@ import org.example.block2.exception.ResourceNotFoundException;
 import org.example.block2.repository.MaterialRepository;
 import org.example.block2.repository.PurchaseRecordRepository;
 import org.example.block2.utils.TestDataFactory;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,7 +40,7 @@ public class PurchaseRecordServiceTest {
     @Autowired
     private TestDataFactory testDataFactory;
 
-    @AfterEach
+    @BeforeEach
     void tearDown() {
         purchaseRecordRepository.deleteAll();
         materialRepository.deleteAll();
