@@ -29,6 +29,7 @@ public class MaterialSaveDto {
     /**
      * Material description.
      */
+    @Size(max = 1000)
     @Schema(description = "Material description", example = "High quality structural steel")
     private String description;
 

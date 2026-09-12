@@ -36,6 +36,7 @@ public class MaterialData {
     /**
      * Material description.
      */
+    @Column(length = 1000)
     private String description;
 
     /**

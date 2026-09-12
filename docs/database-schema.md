@@ -14,7 +14,7 @@ erDiagram
         BIGINT id PK
         VARCHAR name
         VARCHAR unit
-        TEXT description
+        VARCHAR description
     }
 
     PURCHASE_RECORDS {
@@ -31,12 +31,12 @@ erDiagram
 
 Зберігає інформацію про матеріали, які можуть використовуватися в записах про закупівлі.
 
-| Column      | Type         | Constraints                 | Description                                       |
-| ----------- | ------------ |-----------------------------|---------------------------------------------------|
-| id          | BIGINT       | PRIMARY KEY, AUTO INCREMENT | Унікальний ідентифікатор матеріалу                |
-| name        | VARCHAR(255) | NOT NULL                    | Унікальна назва матеріалу,без урахування регістру |
-| unit        | VARCHAR(50)  | NOT NULL                    | Одиниця виміру: `KG`, `LITERS`, `METERS`, `PCS`   |
-| description | TEXT         | NULL                        | Опис матеріалу                                    |
+| Column      | Type           | Constraints                 | Description                                       |
+| ----------- |----------------|-----------------------------|---------------------------------------------------|
+| id          | BIGINT         | PRIMARY KEY, AUTO INCREMENT | Унікальний ідентифікатор матеріалу                |
+| name        | VARCHAR(255)   | NOT NULL                    | Унікальна назва матеріалу,без урахування регістру |
+| unit        | VARCHAR(50)    | NOT NULL                    | Одиниця виміру: `KG`, `LITERS`, `METERS`, `PCS`   |
+| description | VARCHAR(1000)  | NULL                        | Опис матеріалу                                    |
 
 ### purchase_records
 
