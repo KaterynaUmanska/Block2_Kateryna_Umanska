@@ -27,6 +27,7 @@ import jakarta.validation.Validator;
 import org.hibernate.exception.ConstraintViolationException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.List;
 
@@ -117,7 +118,7 @@ public class PurchaseRecordService {
 
         PurchaseRecordData record = purchaseRecordRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.warn("Purchase record with ID {} not found", id);
+                    log.warn("Cannot update purchase record, purchase record with ID {} not found", id);
                     return new ResourceNotFoundException("Purchase record not found with id: " + id);
                 });
 
@@ -151,7 +152,7 @@ public class PurchaseRecordService {
 
         PurchaseRecordData record = purchaseRecordRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.warn("Purchase record with ID {} not found", id);
+                    log.warn("Cannot delete purchase record, record with ID {} not found", id);
                     return new ResourceNotFoundException(
                             "Purchase record not found with id: " + id);
                 });
@@ -183,17 +184,12 @@ public class PurchaseRecordService {
                 filter.getSize()
         );
 
-        String materialName = filter.getMaterialName();
-
-        if (materialName != null && materialName.isBlank()) {
-            materialName = null;
-        }
-
-        Specification<PurchaseRecordData> spec = Specification
-                .where(PurchaseRecordSpecifications.hasOrderId(filter.getOrderId()))
-                .and(PurchaseRecordSpecifications.hasMaterialName(materialName))
-                .and(PurchaseRecordSpecifications.quantityGreaterThanOrEqualTo(filter.getQuantityFrom()))
-                .and(PurchaseRecordSpecifications.quantityLessThanOrEqualTo(filter.getQuantityTo()));
+        Specification<PurchaseRecordData> spec = createSpecification(
+                filter.getOrderId(),
+                filter.getMaterialName(),
+                filter.getQuantityFrom(),
+                filter.getQuantityTo()
+        );
 
         Pageable pageable = PageRequest.of(
                 filter.getPage() - 1,
@@ -220,6 +216,20 @@ public class PurchaseRecordService {
                 records,
                 result.getTotalPages()
         );
+    }
+
+    private Specification<PurchaseRecordData> createSpecification(
+            Long orderId, String materialName, BigDecimal quantityFrom, BigDecimal quantityTo) {
+
+        if (materialName != null && materialName.isBlank()) {
+            materialName = null;
+        }
+
+        return Specification
+                .where(PurchaseRecordSpecifications.hasOrderId(orderId))
+                .and(PurchaseRecordSpecifications.hasMaterialName(materialName))
+                .and(PurchaseRecordSpecifications.quantityGreaterThanOrEqualTo(quantityFrom))
+                .and(PurchaseRecordSpecifications.quantityLessThanOrEqualTo(quantityTo));
     }
 
     /**
@@ -314,17 +324,12 @@ public class PurchaseRecordService {
                 filter.getQuantityTo()
         );
 
-        String materialName = filter.getMaterialName();
-
-        if (materialName != null && materialName.isBlank()) {
-            materialName = null;
-        }
-
-        Specification<PurchaseRecordData> spec = Specification
-                .where(PurchaseRecordSpecifications.hasOrderId(filter.getOrderId()))
-                .and(PurchaseRecordSpecifications.hasMaterialName(materialName))
-                .and(PurchaseRecordSpecifications.quantityGreaterThanOrEqualTo(filter.getQuantityFrom()))
-                .and(PurchaseRecordSpecifications.quantityLessThanOrEqualTo(filter.getQuantityTo()));
+        Specification<PurchaseRecordData> spec = createSpecification(
+                filter.getOrderId(),
+                filter.getMaterialName(),
+                filter.getQuantityFrom(),
+                filter.getQuantityTo()
+        );
 
         List<PurchaseRecordData> records = purchaseRecordRepository.findAll(spec);
 
