@@ -89,18 +89,15 @@ CREATE UNIQUE INDEX uk_material_name_lower
 
 Для бази даних створено такі індекси:
 
-| Index                           | Table            | Columns               | Purpose                                                           |
-| ------------------------------- | ---------------- | --------------------- |-------------------------------------------------------------------|
-| `idx_purchase_records_material` | purchase_records | material_id           | Ефективний пошук матеріалу та виконання з'єднань (joins)          |
-| `idx_purchase_records_order`    | purchase_records | order_id              | Ефективна фільтрація за замовленням                               |
-| `uk_order_material`             | purchase_records | order_id, material_id | Забезпечує унікальність комбінації order_id + material_id         |
-| `uk_material_name_lower`        | materials        | LOWER(name)           | Забезпечує унікальність назви матеріалу без урахування регістру   |
+| Index                           | Table            | Columns               | Purpose                                                         |
+| ------------------------------- | ---------------- | --------------------- |-----------------------------------------------------------------|
+| `idx_purchase_records_material` | purchase_records | material_id           | Ефективний пошук матеріалу та виконання з'єднань                |
+| `idx_purchase_records_order`    | purchase_records | order_id              | Ефективна фільтрація за замовленням                             |
+| `uk_order_material`             | purchase_records | order_id, material_id | Забезпечує унікальність комбінації order_id + material_id       |
+| `uk_material_name_lower`        | materials        | LOWER(name)           | Забезпечує унікальність назви матеріалу без урахування регістру |
 
-
-
-Окремий індекс для стовпця quantity не створюється.
-Поле quantity використовується для необов'язкової фільтрації за діапазоном. 
-Додатковий індекс не потрібен для поточного навантаження на додаток і обсягу даних. 
+Окремий індекс для стовпця quantity не створюється. 
+Індексування кількості матеріалів у заявці є недоцільним, оскільки значення quantity мають відносно невелику кількість варіацій і не забезпечують достатньої селективності для ефективного використання окремого індексу.
 
 ## Database-related Application Flow
 
