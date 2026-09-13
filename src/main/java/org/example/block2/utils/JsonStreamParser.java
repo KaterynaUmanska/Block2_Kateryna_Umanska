@@ -37,9 +37,7 @@ public class JsonStreamParser {
             JsonToken firstToken = parser.nextToken();
 
             if (firstToken != JsonToken.START_ARRAY) {
-                throw new InvalidFileFormatException(
-                        "Expected JSON array"
-                );
+                throw new InvalidFileFormatException("Expected JSON array");
             }
 
             while (true) {
@@ -50,9 +48,7 @@ public class JsonStreamParser {
                 }
 
                 if (token != JsonToken.START_OBJECT) {
-                    throw new InvalidFileFormatException(
-                            "Expected JSON object in array"
-                    );
+                    throw new InvalidFileFormatException("Expected JSON object in array");
                 }
 
                 PurchaseRecordSaveDto record =
@@ -65,9 +61,7 @@ public class JsonStreamParser {
             }
 
             if (parser.nextToken() != null) {
-                throw new InvalidFileFormatException(
-                        "Additional data found after JSON array completion"
-                );
+                throw new InvalidFileFormatException("Additional data found after JSON array completion");
             }
         }
     }
