@@ -42,9 +42,7 @@ public class MaterialService {
         log.info("Attempting to save new material with name: '{}'", dto.getName());
 
         if (materialRepository.existsByNameIgnoreCase(dto.getName())) {
-            throw new DuplicateResourceException(
-                    "Material with name '%s' already exists".formatted(dto.getName())
-            );
+            throw new DuplicateResourceException("Material with name '%s' already exists".formatted(dto.getName()));
         }
 
         MaterialData material = convertToData(dto);
@@ -87,9 +85,7 @@ public class MaterialService {
         MaterialData data = materialRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Material with ID {} not found", id);
-                    return new ResourceNotFoundException(
-                            "Material not found with id: " + id
-                    );
+                    return new ResourceNotFoundException("Material not found with id: " + id);
                 });
 
         return convertToDto(data);
@@ -109,17 +105,13 @@ public class MaterialService {
         MaterialData material = materialRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Material with ID {} not found", id);
-                    return new ResourceNotFoundException(
-                            "Material not found with id: " + id
-                    );
+                    return new ResourceNotFoundException("Material not found with id: " + id);
                 });
 
         materialRepository.findByNameIgnoreCase(dto.getName())
                 .ifPresent(existing -> {
                    if (!existing.getId().equals(id)) {
-                        throw new DuplicateResourceException(
-                                "Material with name '%s' already exists".formatted(dto.getName())
-                        );
+                        throw new DuplicateResourceException("Material with name '%s' already exists".formatted(dto.getName()));
                     }
                 });
 

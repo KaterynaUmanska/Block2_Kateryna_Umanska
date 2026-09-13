@@ -98,9 +98,7 @@ public class PurchaseRecordService {
         PurchaseRecordData data = purchaseRecordRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Purchase record with ID {} not found", id);
-                    return new ResourceNotFoundException(
-                            "Purchase record not found with id: " + id
-                    );
+                    return new ResourceNotFoundException("Purchase record not found with id: " + id);
                 });
 
         return convertToDto(data);
@@ -120,9 +118,7 @@ public class PurchaseRecordService {
         PurchaseRecordData record = purchaseRecordRepository.findById(id)
                 .orElseThrow(() -> {
                     log.warn("Purchase record with ID {} not found", id);
-                    return new ResourceNotFoundException(
-                            "Purchase record not found with id: " + id
-                    );
+                    return new ResourceNotFoundException("Purchase record not found with id: " + id);
                 });
 
         MaterialData material = findMaterial(dto.getMaterialId());
@@ -137,8 +133,7 @@ public class PurchaseRecordService {
 
             log.info("Successfully updated purchase record with ID: {}", id);
         } catch (DataIntegrityViolationException | ConstraintViolationException ex) {
-            throw new DuplicateResourceException(
-                    "Purchase record for order ID '%d' and material ID '%d' already exists"
+            throw new DuplicateResourceException("Purchase record for order ID '%d' and material ID '%d' already exists"
                             .formatted(dto.getOrderId(), dto.getMaterialId())
             );
         }
@@ -158,8 +153,7 @@ public class PurchaseRecordService {
                 .orElseThrow(() -> {
                     log.warn("Purchase record with ID {} not found", id);
                     return new ResourceNotFoundException(
-                            "Purchase record not found with id: " + id
-                    );
+                            "Purchase record not found with id: " + id);
                 });
 
         purchaseRecordRepository.delete(record);

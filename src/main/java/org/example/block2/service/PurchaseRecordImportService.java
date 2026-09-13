@@ -38,11 +38,7 @@ public class PurchaseRecordImportService {
     public void saveSingleRecordSafely(PurchaseRecordSaveDto dto) {
 
         MaterialData material = materialRepository.findById(dto.getMaterialId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Material not found with id: " + dto.getMaterialId()
-                        )
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("Material not found with id: " + dto.getMaterialId()));
 
         PurchaseRecordData data = new PurchaseRecordData();
         data.setOrderId(dto.getOrderId());
@@ -58,13 +54,8 @@ public class PurchaseRecordImportService {
             if (ex.getMessage() != null
                     && ex.getMessage().toLowerCase().contains("uk_order_material")) {
 
-                throw new DuplicateResourceException(
-                        "Purchase record for order ID '%d' and material ID '%d' already exists"
-                                .formatted(
-                                        dto.getOrderId(),
-                                        dto.getMaterialId()
-                                )
-                );
+                throw new DuplicateResourceException("Purchase record for order ID '%d' and material ID '%d' already exists"
+                        .formatted(dto.getOrderId(), dto.getMaterialId()));
             }
 
             throw ex;

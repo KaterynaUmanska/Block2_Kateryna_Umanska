@@ -17,8 +17,7 @@ public class CsvReportService {
      * @param records purchase records
      * @return CSV content
      */
-    public byte[] generatePurchaseRecordsReport(
-            List<PurchaseRecordData> records) {
+    public byte[] generatePurchaseRecordsReport(List<PurchaseRecordData> records) {
 
         StringBuilder csv = new StringBuilder();
 
