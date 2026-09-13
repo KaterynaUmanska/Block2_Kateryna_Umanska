@@ -28,7 +28,7 @@ public class MaterialDto {
     private String name;
 
     /**
-     * Unit of measurement.
+     * Material unit.
      */
     @Schema(description = "Unit of measurement", example = "KG")
     private Unit unit;
