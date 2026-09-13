@@ -45,7 +45,7 @@ public class MaterialControllerTest {
     private TestDataFactory testDataFactory;
 
     @BeforeEach
-    void tearDown() {
+    void setUp() {
         purchaseRecordRepository.deleteAll();
         materialRepository.deleteAll();
     }
