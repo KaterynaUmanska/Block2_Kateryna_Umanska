@@ -244,7 +244,7 @@ public class PurchaseRecordServiceTest {
         assertThat(result.getList()).hasSize(1);
         assertThat(result.getTotalPages()).isEqualTo(1);
 
-        PurchaseRecordListDto record = result.getList().get(0);
+        PurchaseRecordListDto record = result.getList().getFirst();
 
         assertThat(record.getOrderId()).isEqualTo(100L);
         assertThat(record.getMaterialName()).isEqualTo("Cable");

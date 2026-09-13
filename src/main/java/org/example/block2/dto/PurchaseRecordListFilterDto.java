@@ -4,7 +4,6 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 
 /**
  * DTO for filtering and paginating purchase records.

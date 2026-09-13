@@ -542,12 +542,7 @@ public class PurchaseRecordControllerTest {
         ]
         """.formatted(material.getId(), material.getId());
 
-        MockMultipartFile file = new MockMultipartFile(
-                "file",
-                "purchases.json",
-                MediaType.APPLICATION_JSON_VALUE,
-                json.getBytes(StandardCharsets.UTF_8)
-        );
+        MockMultipartFile file = createMockFile(json);
 
         mockMvc.perform(
                         multipart("/api/purchases/upload")
@@ -560,6 +555,15 @@ public class PurchaseRecordControllerTest {
         assertEquals(
                 2,
                 purchaseRecordRepository.count()
+        );
+    }
+
+    private MockMultipartFile createMockFile(String content) {
+        return new MockMultipartFile(
+                "file",
+                "purchases.json",
+                MediaType.APPLICATION_JSON_VALUE,
+                content.getBytes(StandardCharsets.UTF_8)
         );
     }
 
@@ -582,12 +586,7 @@ public class PurchaseRecordControllerTest {
         ]
         """.formatted(material.getId(), material.getId());
 
-        MockMultipartFile file = new MockMultipartFile(
-                "file",
-                "purchases.json",
-                MediaType.APPLICATION_JSON_VALUE,
-                json.getBytes(StandardCharsets.UTF_8)
-        );
+        MockMultipartFile file = createMockFile(json);
 
         mockMvc.perform(
                         multipart("/api/purchases/upload")
@@ -655,12 +654,7 @@ public class PurchaseRecordControllerTest {
         ]
         """.formatted(material.getId(), material.getId());
 
-        MockMultipartFile file = new MockMultipartFile(
-                "file",
-                "purchases.json",
-                MediaType.APPLICATION_JSON_VALUE,
-                json.getBytes(StandardCharsets.UTF_8)
-        );
+        MockMultipartFile file = createMockFile(json);
 
         mockMvc.perform(
                         multipart("/api/purchases/upload")

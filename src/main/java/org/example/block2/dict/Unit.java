@@ -8,6 +8,6 @@ public enum Unit {
     KG,
     PCS,
     METERS,
-    LITERS;
+    LITERS
 
 }

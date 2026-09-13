@@ -24,7 +24,7 @@ public class PurchaseRecordSaveDto {
      */
     @NotNull(message = "Order ID cannot be null")
     @Positive(message = "ID must be greater than 0")
-    @Schema(description = "ID of the purchase order", example = "1001", required = true)
+    @Schema(description = "ID of the purchase order", example = "1001")
     private Long orderId;
 
     /**

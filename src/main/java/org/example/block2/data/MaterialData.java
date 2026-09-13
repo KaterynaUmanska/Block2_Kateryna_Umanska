@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.example.block2.dict.Unit;
 
-import java.util.Set;
-
 /**
  * Material persistent entity.
  */

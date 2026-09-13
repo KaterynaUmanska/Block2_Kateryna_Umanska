@@ -3,14 +3,8 @@ import lombok.RequiredArgsConstructor;
 import org.example.block2.data.MaterialData;
 import org.example.block2.data.PurchaseRecordData;
 import org.example.block2.dict.Unit;
-import org.example.block2.dto.MaterialDto;
-import org.example.block2.dto.MaterialSaveDto;
-import org.example.block2.dto.PurchaseRecordDto;
-import org.example.block2.dto.PurchaseRecordSaveDto;
 import org.example.block2.repository.MaterialRepository;
 import org.example.block2.repository.PurchaseRecordRepository;
-import org.example.block2.service.MaterialService;
-import org.example.block2.service.PurchaseRecordService;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -23,6 +17,7 @@ public class TestDataFactory {
     private final PurchaseRecordRepository purchaseRecordRepository;
 
     public MaterialData createMaterial() {
+
         return createMaterial("Test steel");
     }
 

@@ -104,7 +104,7 @@ public class MaterialService {
 
         MaterialData material = materialRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.warn("Material with ID {} not found", id);
+                    log.warn("Cannot upload material, material with ID {} not found", id);
                     return new ResourceNotFoundException("Material not found with id: " + id);
                 });
 
@@ -135,7 +135,7 @@ public class MaterialService {
 
         MaterialData material = materialRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.warn("Material with ID {} not found", id);
+                    log.warn("Cannot delete material, material with ID {} not found", id);
                     return new ResourceNotFoundException("Material not found with id: " + id);
                 });
 
