@@ -15,6 +15,7 @@ import org.example.block2.service.PurchaseRecordService;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.IOException;
 
@@ -149,10 +150,11 @@ public class PurchaseRecordController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class)))
     })
     @PostMapping("/_report")
-    public ResponseEntity<byte[]> generateReport(
+    public ResponseEntity<StreamingResponseBody> generateReport(
             @RequestBody @Valid PurchaseRecordFilterDto filter) {
 
-        byte[] report = purchaseRecordService.generateReport(filter);
+        StreamingResponseBody responseBody = outputStream ->
+                purchaseRecordService.generateReport(filter, outputStream);
 
         return ResponseEntity.ok()
                 .header(
@@ -160,8 +162,7 @@ public class PurchaseRecordController {
                         "attachment; filename=\"purchase_records.csv\""
                 )
                 .contentType(MediaType.valueOf("text/csv; charset=UTF-8"))
-                .contentLength(report.length)
-                .body(report);
+                .body(responseBody);
     }
 
     /**

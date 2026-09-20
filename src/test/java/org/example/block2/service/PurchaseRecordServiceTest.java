@@ -16,7 +16,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -263,15 +265,18 @@ public class PurchaseRecordServiceTest {
         filter.setQuantityFrom(BigDecimal.valueOf(15.0));
         filter.setQuantityTo(BigDecimal.valueOf(25.0));
 
-        byte[] report = purchaseRecordService.generateReport(filter);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        assertThat(report).isNotNull();
+        purchaseRecordService.generateReport(filter, outputStream);
+
+        byte[] report = outputStream.toByteArray();
+
         assertThat(report).isNotEmpty();
 
-        String csv = new String(report, java.nio.charset.StandardCharsets.UTF_8);
+        String csv = new String(report, StandardCharsets.UTF_8);
 
         assertThat(csv).contains("100");
-        assertThat(csv).contains("20,0");
+        assertThat(csv).contains("20,00");
         assertThat(csv).contains(uniqueMaterialName);
     }
 

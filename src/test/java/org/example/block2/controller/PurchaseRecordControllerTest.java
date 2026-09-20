@@ -3,6 +3,7 @@ package org.example.block2.controller;
 import org.example.block2.data.MaterialData;
 import org.example.block2.data.PurchaseRecordData;
 import org.example.block2.dict.Unit;
+import org.example.block2.dto.PurchaseRecordFilterDto;
 import org.example.block2.dto.PurchaseRecordSaveDto;
 import org.example.block2.repository.MaterialRepository;
 import org.example.block2.repository.PurchaseRecordRepository;
@@ -14,9 +15,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.hamcrest.Matchers.notNullValue;
@@ -26,10 +29,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MvcResult;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.hamcrest.Matchers.not;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -463,37 +471,35 @@ public class PurchaseRecordControllerTest {
 
     @Test
     void generateReport_shouldReturnCsvFile() throws Exception {
-        MaterialData material = testDataFactory.createMaterial();
+        String uniqueMaterialName = "Test name " + UUID.randomUUID();
+        MaterialData material = testDataFactory.createMaterial(uniqueMaterialName);
 
-        testDataFactory.createPurchaseRecord(100L, material, 10.0);
-        testDataFactory.createPurchaseRecord(101L, material, 20.0);
+        testDataFactory.createPurchaseRecord(100L, material, 20.0);
 
-        String request = """
-            {}
-            """;
+        PurchaseRecordFilterDto filter = new PurchaseRecordFilterDto();
+        filter.setOrderId(100L);
+        filter.setMaterialName(uniqueMaterialName);
+        filter.setQuantityFrom(BigDecimal.valueOf(15.0));
+        filter.setQuantityTo(BigDecimal.valueOf(25.0));
 
-        mockMvc.perform(post("/api/purchases/_report")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(request))
+        MvcResult mvcResult = mockMvc.perform(
+                        post("/api/purchases/_report")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(filter))
+                )
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(header().string(
-                        "Content-Type",
-                        org.hamcrest.Matchers.containsString("text/csv")
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"purchase_records.csv\""
                 ))
-                .andExpect(header().string(
-                        "Content-Disposition",
-                        org.hamcrest.Matchers.containsString("attachment")
-                ))
-                .andExpect(header().string(
-                        "Content-Disposition",
-                        org.hamcrest.Matchers.containsString(".csv")
-                ))
-                .andExpect(content().string(
-                        org.hamcrest.Matchers.containsString("100")
-                ))
-                .andExpect(content().string(
-                        org.hamcrest.Matchers.containsString("10,0")
-                ));
+                .andExpect(content().contentTypeCompatibleWith("text/csv"))
+                .andExpect(content().string(containsString("100")))
+                .andExpect(content().string(containsString("20,00")))
+                .andExpect(content().string(containsString(uniqueMaterialName)));
     }
 
     @Test
@@ -504,23 +510,33 @@ public class PurchaseRecordControllerTest {
         testDataFactory.createPurchaseRecord(200L, material, 20.0);
 
         String request = """
-            {
-                "orderId": 100
-            }
-            """;
+        {
+            "orderId": 100
+        }
+        """;
 
-        mockMvc.perform(post("/api/purchases/_report")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(request))
+        MvcResult mvcResult = mockMvc.perform(
+                        post("/api/purchases/_report")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(request))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isOk())
                 .andExpect(content().string(
-                        org.hamcrest.Matchers.containsString("100")
+                        containsString("100")
                 ))
                 .andExpect(content().string(
-                        org.hamcrest.Matchers.containsString("10,0")
+                        containsString("10,00")
+                ))
+                .andExpect(content().string(
+                        not(containsString("200"))
+                ))
+                .andExpect(content().string(
+                        not(containsString("20,00"))
                 ));
     }
-
     @Test
     void upload_shouldImportValidRecords() throws Exception {
         MaterialData material = testDataFactory.createMaterial();

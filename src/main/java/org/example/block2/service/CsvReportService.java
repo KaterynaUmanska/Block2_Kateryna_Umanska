@@ -3,8 +3,8 @@ package org.example.block2.service;
 import org.example.block2.data.PurchaseRecordData;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
-import java.util.List;
+import java.io.IOException;
+import java.io.Writer;
 
 /**
  * Service for generating CSV reports.
@@ -12,37 +12,37 @@ import java.util.List;
 @Service
 public class CsvReportService {
     /**
-     * Generates CSV content from purchase records.
+     * Writes CSV header.
      *
-     * @param records purchase records
-     * @return CSV content
+     * @param writer output writer
+     * @throws IOException if writing fails
      */
-    public byte[] generatePurchaseRecordsReport(List<PurchaseRecordData> records) {
+    public void writeHeader(Writer writer) throws IOException {
+        writer.write("\uFEFF");
+        writer.write("ID,Order ID,Material,Quantity\n");
+    }
 
-        StringBuilder csv = new StringBuilder();
+    /**
+     * Writes one purchase record to CSV.
+     *
+     * @param writer output writer
+     * @param record purchase record
+     * @throws IOException if writing fails
+     */
+    public void writeRecord(
+            Writer writer,
+            PurchaseRecordData record
+    ) throws IOException {
 
-        csv.append("id;orderId;materialId;materialName;quantity\n");
-
-        for (PurchaseRecordData record : records) {
-            csv.append(record.getId()).append(";");
-            csv.append(record.getOrderId()).append(";");
-            csv.append(record.getMaterial().getId()).append(";");
-            csv.append(escape(record.getMaterial().getName())).append(";");
-            String quantity = record.getQuantity() != null
-                    ? record.getQuantity().toString().replace('.', ',')
-                    : "";
-            csv.append(quantity).append("\n");
-        }
-
-        byte[] contentBytes = csv.toString().getBytes(StandardCharsets.UTF_8);
-
-        byte[] bom = {(byte) 0xEF, (byte) 0xBB, (byte) 0xBF};
-        byte[] result = new byte[bom.length + contentBytes.length];
-
-        System.arraycopy(bom, 0, result, 0, bom.length);
-        System.arraycopy(contentBytes, 0, result, bom.length, contentBytes.length);
-
-        return result;
+        writer.write(String.format(
+                "%d,%s,%s,%.2f\n",
+                record.getId(),
+                record.getOrderId(),
+                record.getMaterial() != null
+                        ? escape(record.getMaterial().getName())
+                        : "",
+                record.getQuantity()
+        ));
     }
 
     /**

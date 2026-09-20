@@ -48,6 +48,7 @@ public class PurchaseRecordService {
     private final PurchaseRecordMapper purchaseRecordMapper;
 
     private final PurchaseRecordImportService purchaseRecordImportService;
+    private final CsvReportService csvReportService;
 
     private final ObjectMapper objectMapper;
     private final Validator validator;
@@ -267,14 +268,17 @@ public class PurchaseRecordService {
     }
 
     /**
-     * Generates CSV report for purchase records matching filters.
+     * Writes CSV report for purchase records matching filters.
      *
      * @param filter filters for purchase records
-     * @return CSV report as byte array
+     * @param outputStream output stream for the generated CSV
      */
     @Transactional(readOnly = true)
     @Monitored
-    public byte[] generateReport(PurchaseRecordFilterDto filter) {
+    public void generateReport(
+            PurchaseRecordFilterDto filter,
+            OutputStream outputStream
+    ) {
 
         log.info(
                 "Generating purchase records report with filters: orderId={}, materialName={}, quantityFrom={}, quantityTo={}",
@@ -291,39 +295,42 @@ public class PurchaseRecordService {
                 filter.getQuantityTo()
         );
 
-        int pageSize = 1000;
-        int pageNumber = 0;
-        Page<PurchaseRecordData> page;
+        Pageable pageable = PageRequest.of(
+                0,
+                1000,
+                Sort.by("id").ascending()
+        );
 
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8))) {
+        long totalRecords = 0;
 
-            writer.write("ID,Order ID,Material,Quantity\n");
+        try (BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(outputStream, StandardCharsets.UTF_8))) {
 
-            long totalRecords = 0;
+            csvReportService.writeHeader(writer);
+
+            Page<PurchaseRecordData> page;
 
             do {
-                Pageable pageable = PageRequest.of(pageNumber, pageSize);
                 page = purchaseRecordRepository.findAll(spec, pageable);
 
                 for (PurchaseRecordData record : page.getContent()) {
-                    writer.write(String.format("%d,%s,%s,%.2f\n",
-                            record.getId(),
-                            record.getOrderId(),
-                            record.getMaterial() != null ? record.getMaterial().getName() : "",
-                            record.getQuantity()
-                    ));
+                    csvReportService.writeRecord(writer, record);
                 }
 
                 totalRecords += page.getNumberOfElements();
-                pageNumber++;
+
+                if (page.hasNext()) {
+                    pageable = page.nextPageable();
+                }
 
             } while (page.hasNext());
 
             writer.flush();
 
-            log.info("Successfully generated purchase records report with {} records (paginated)", totalRecords);
-            return baos.toByteArray();
+            log.info(
+                    "Successfully generated purchase records report with {} records",
+                    totalRecords
+            );
 
         } catch (IOException e) {
             log.error("Failed to generate CSV report due to I/O error", e);
