@@ -8,6 +8,7 @@ import org.example.block2.dto.PurchaseRecordSaveDto;
 import org.example.block2.repository.MaterialRepository;
 import org.example.block2.repository.PurchaseRecordRepository;
 import org.example.block2.utils.TestDataFactory;
+import org.example.block2.utils.TestcontainersConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -41,6 +43,7 @@ import java.util.UUID;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(TestcontainersConfiguration.class)
 public class PurchaseRecordControllerTest {
 
     @Autowired

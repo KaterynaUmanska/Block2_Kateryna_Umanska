@@ -11,16 +11,19 @@ import org.example.block2.exception.ResourceNotFoundException;
 import org.example.block2.repository.MaterialRepository;
 import org.example.block2.repository.PurchaseRecordRepository;
 import org.example.block2.utils.TestDataFactory;
+import org.example.block2.utils.TestcontainersConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@Import(TestcontainersConfiguration.class)
 @SpringBootTest
 public class MaterialServiceTest {
 

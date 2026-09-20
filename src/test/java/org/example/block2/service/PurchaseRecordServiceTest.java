@@ -11,10 +11,12 @@ import org.example.block2.exception.ResourceNotFoundException;
 import org.example.block2.repository.MaterialRepository;
 import org.example.block2.repository.PurchaseRecordRepository;
 import org.example.block2.utils.TestDataFactory;
+import org.example.block2.utils.TestcontainersConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
@@ -22,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Import(TestcontainersConfiguration.class)
 @SpringBootTest
 public class PurchaseRecordServiceTest {
 

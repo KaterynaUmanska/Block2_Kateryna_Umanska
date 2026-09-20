@@ -35,7 +35,7 @@ public class CsvReportService {
     ) throws IOException {
 
         writer.write(String.format(
-                "%d,%s,%s,%.2f\n",
+                "%d,%s,%s,\"%.2f\"\n",
                 record.getId(),
                 record.getOrderId(),
                 record.getMaterial() != null
@@ -57,7 +57,7 @@ public class CsvReportService {
             return "";
         }
 
-        if (value.contains(";")
+        if (value.contains(",")
                 || value.contains("\"")
                 || value.contains("\n")) {
 
