@@ -14,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.hibernate.exception.ConstraintViolationException;
 
 /**
  * Service for importing individual purchase records.
@@ -51,11 +52,19 @@ public class PurchaseRecordImportService {
             entityManager.flush();
 
         } catch (DataIntegrityViolationException ex) {
-            if (ex.getMessage() != null
-                    && ex.getMessage().toLowerCase().contains("uk_order_material")) {
+            Throwable cause = ex.getCause();
 
-                throw new DuplicateResourceException("Purchase record for order ID '%d' and material ID '%d' already exists"
-                        .formatted(dto.getOrderId(), dto.getMaterialId()));
+            while (cause != null) {
+                if (cause instanceof ConstraintViolationException cve) {
+                    if ("uk_order_material".equalsIgnoreCase(cve.getConstraintName())) {
+                        throw new DuplicateResourceException(
+                                "Purchase record for order ID '%d' and material ID '%d' already exists"
+                                        .formatted(dto.getOrderId(), dto.getMaterialId())
+                        );
+                    }
+                }
+
+                cause = cause.getCause();
             }
 
             throw ex;
