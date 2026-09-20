@@ -40,13 +40,13 @@ Database schema створюється та контролюється за до
 
 ## REST API
 ### PurchaseRecord
-* GET /api/purchase-records/{id} - Отримання запису про закупівлю за ID
-* POST /api/purchase-records - Створення запису про закупівлю
-* PUT /api/purchase-records/{id} - Оновлення запису про закупівлю
-* DELETE /api/purchase-records/{id} - Видалення запису про закупівлю
-* POST /api/purchase-records/_list - Отримання відфільтрованого списку із пагінацією
-* POST /api/purchase-records/_report - Генерація звіту у форматі CSV
-* POST /api/purchase-records/upload - Імпорт записів про закупівлі з JSON
+* GET /api/purchases/{id} - Отримання запису про закупівлю за ID
+* POST /api/purchases - Створення запису про закупівлю
+* PUT /api/purchases/{id} - Оновлення запису про закупівлю
+* DELETE /api/purchases/{id} - Видалення запису про закупівлю
+* POST /api/purchases/_list - Отримання відфільтрованого списку із пагінацією
+* POST /api/purchases/_report - Генерація звіту у форматі CSV
+* POST /api/purchases/upload - Імпорт записів про закупівлі з JSON
 
 ### Material
 * GET /api/materials - Отримання всіх матеріалів
@@ -91,7 +91,7 @@ JSON
 ```
 
 ## Імпорт JSON
-Ендпоінт `POST /api/purchase-records/upload` приймає JSON-файл, що містить записи про звкупівлі.
+Ендпоінт `POST /api/purchases/upload` приймає JSON-файл, що містить записи про звкупівлі.
 
 Кожен імпортований запис проходить такі етапи:
 * парситься з JSON;
@@ -113,7 +113,7 @@ JSON
 Невалідні записи не перешкоджають імпорту інших валідних записів.
 Кожен запис обробляється в ізольованій транзакції, завдяки чому збій в одному записі не відкочує успішно імпортовані записи.
 
-У корені репозиторію міститься файл purchases.json для демонстрації пакетного імпорту через POST-запит на /api/purchase-records/upload. 
+У корені репозиторію міститься файл purchases.json для демонстрації пакетного імпорту через POST-запит на /api/purchases/upload. 
 Він узгоджений із початковими даними Liquibase та містить 10 записів, серед яких 8 валідних і 2 навмисно невалідні для перевірки ізольованої обробки помилок і отримання статистики успіху.
 
 ## Звіт
@@ -124,7 +124,7 @@ JSON
 ```
 HTTP
 Content-Type: text/csv
-Content-Disposition: attachment; filename="purchase-records.csv"
+Content-Disposition: attachment; filename="purchases.csv"
 ```
 
 ## Робота з CSV-файлом

@@ -5,6 +5,7 @@ import jakarta.persistence.PersistenceContext;
 import org.example.block2.dto.MaterialDto;
 import org.example.block2.exception.DuplicateResourceException;
 import org.example.block2.exception.ResourceNotFoundException;
+import org.example.block2.mapper.MaterialMapper;
 import org.example.block2.monitor.Monitored;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import java.util.List;
 public class MaterialService {
 
     private final MaterialRepository materialRepository;
+    private final MaterialMapper materialMapper;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -45,11 +47,11 @@ public class MaterialService {
             throw new DuplicateResourceException("Material with name '%s' already exists".formatted(dto.getName()));
         }
 
-        MaterialData material = convertToData(dto);
+        MaterialData material = materialMapper.toEntity(dto);
         MaterialData saved = materialRepository.save(material);
 
         log.info("Successfully saved material with ID: {}", saved.getId());
-        return convertToDto(saved);
+        return materialMapper.toDto(saved);
     }
 
     /**
@@ -63,7 +65,7 @@ public class MaterialService {
         log.debug("Fetching all materials from database");
 
         List<MaterialDto> materials = materialRepository.findAll().stream()
-                .map(MaterialService::convertToDto)
+                .map(materialMapper::toDto)
                 .toList();
 
         log.info("Found {} materials in total", materials.size());
@@ -88,7 +90,7 @@ public class MaterialService {
                     return new ResourceNotFoundException("Material not found with id: " + id);
                 });
 
-        return convertToDto(data);
+        return materialMapper.toDto(data);
     }
 
     /**
@@ -144,36 +146,4 @@ public class MaterialService {
         log.info("Successfully deleted material with ID: {}", id);
     }
 
-    /**
-     * Converts entity to DTO.
-     *
-     * @param data material entity
-     * @return material DTO
-     */
-    private static MaterialDto convertToDto(MaterialData data) {
-        if (data == null) {
-            return null;
-        }
-
-        return MaterialDto.builder()
-                .id(data.getId())
-                .name(data.getName())
-                .unit(data.getUnit())
-                .description(data.getDescription())
-                .build();
-    }
-
-    /**
-     * Converts save DTO to entity.
-     *
-     * @param dto save DTO
-     * @return material entity
-     */
-    private static MaterialData convertToData(MaterialSaveDto dto) {
-        MaterialData result = new MaterialData();
-        result.setName(dto.getName());
-        result.setUnit(dto.getUnit());
-        result.setDescription(dto.getDescription());
-        return result;
-    }
 }
