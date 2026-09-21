@@ -75,7 +75,6 @@ Database schema створюється та контролюється за до
 
 API повертає скорочений набір полів для запитів списку:
 
-JSON
 ```
 {
 "list": [
@@ -102,7 +101,6 @@ JSON
 
 Імпорт повертає статистику обробки:
 
-JSON
 ```
 {
 "successful": 8,
@@ -124,7 +122,7 @@ JSON
 ```
 HTTP
 Content-Type: text/csv
-Content-Disposition: attachment; filename="purchases.csv"
+Content-Disposition: attachment; filename="purchase_records.csv"
 ```
 
 ## Робота з CSV-файлом
@@ -149,6 +147,8 @@ Hibernate налаштований лише на перевірку схеми:
 * Java 21
 * Maven
 * PostgreSQL
+
+Для запуску інтеграційних тестів необхідний Docker Desktop, оскільки тести використовують Testcontainers.
 
 Необхідні Java-залежності визначені у pom.xml.
 
@@ -180,6 +180,8 @@ Hibernate налаштований лише на перевірку схеми:
 `mvn spring-boot:run`
 
 Під час запуску Liquibase автоматично створює необхідну структуру бази даних та додає початкові дані.
+
+Інтеграційні тести використовують Testcontainers і вимагають запущеного Docker Desktop.
 
 ## Основні бібліотеки та залежності
 
